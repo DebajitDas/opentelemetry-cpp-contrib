@@ -17,26 +17,32 @@
 #ifndef __SERVERSPAN_H
 #define __SERVERSPAN_H
 
-#include "AgentLogger.h"
-#include "sdkwrapper/IScopedSpan.h"
 #include <opentelemetry/context/runtime_context.h>
 #include <opentelemetry/trace/scope.h>
 #include <opentelemetry/trace/span.h>
 #include <opentelemetry/trace/tracer.h>
 #include <unordered_map>
+#include "AgentLogger.h"
+#include "sdkwrapper/IScopedSpan.h"
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
 class ScopedSpan;
 class ISdkHelperFactory;
 
-class ServerSpan : public IScopedSpan {
+class ServerSpan : public IScopedSpan
+{
 public:
-  ServerSpan(const std::string &name, const OtelKeyValueMap &atttibutes,
+  ServerSpan(const std::string &name,
+             const OtelKeyValueMap &atttibutes,
              const std::unordered_map<std::string, std::string> &carrier,
-             ISdkHelperFactory *sdkHelperFactory, const AgentLogger &logger);
+             ISdkHelperFactory *sdkHelperFactory,
+             const AgentLogger &logger);
 
   void End() override;
 
@@ -44,8 +50,7 @@ public:
                 const std::chrono::system_clock::time_point &timePoint,
                 const OtelKeyValueMap &attributes) override;
 
-  void AddAttribute(const std::string &key,
-                    const SpanAttributeValue &value) override;
+  void AddAttribute(const std::string &key, const SpanAttributeValue &value) override;
 
   void SetStatus(const StatusCode status, const std::string &desc) override;
 
@@ -57,8 +62,8 @@ private:
   const AgentLogger &mLogger;
 };
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd
 
 #endif

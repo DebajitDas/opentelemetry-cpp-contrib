@@ -21,38 +21,44 @@
 #include <opentelemetry/nostd/string_view.h>
 #include <unordered_map>
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
 using namespace opentelemetry;
-class OtelCarrier : public opentelemetry::context::propagation::TextMapCarrier {
+class OtelCarrier : public opentelemetry::context::propagation::TextMapCarrier
+{
 public:
   static constexpr const char *EMPTY_STR = "";
-  OtelCarrier(const std::unordered_map<std::string, std::string> &pairs = {})
-      : kvPairs(pairs) {}
+  OtelCarrier(const std::unordered_map<std::string, std::string> &pairs = {}) : kvPairs(pairs) {}
 
-  nostd::string_view Get(nostd::string_view key) const noexcept override {
+  nostd::string_view Get(nostd::string_view key) const noexcept override
+  {
     const std::string keyStr = {key.data(), key.size()};
-    auto itr = kvPairs.find(keyStr);
-    if (itr != kvPairs.end()) {
+    auto itr                 = kvPairs.find(keyStr);
+    if (itr != kvPairs.end())
+    {
       return itr->second;
     }
     return EMPTY_STR;
   }
 
-  void Set(nostd::string_view key, nostd::string_view value) noexcept override {
-    const std::string keyStr = {key.data(), key.size()};
+  void Set(nostd::string_view key, nostd::string_view value) noexcept override
+  {
+    const std::string keyStr   = {key.data(), key.size()};
     const std::string valueStr = {value.data(), value.size()};
-    kvPairs[keyStr] = valueStr;
+    kvPairs[keyStr]            = valueStr;
   }
 
 private:
   std::unordered_map<std::string, std::string> kvPairs;
 };
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd
 
 #endif

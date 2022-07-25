@@ -39,9 +39,8 @@ used to separate multiple values in the URI_NAMING_KEY_SUFFIX_KEY
 entry in the string dictionary the configures the automatic business transaction
 logic
 */
-static const char URI_SUFFIX_KEY_SEPARATOR_STR[] = {URI_SUFFIX_KEY_SEPARATOR,
-                                                    '\0'};
-static const char URI_PARAMETER_DELIMITER = '.';
+static const char URI_SUFFIX_KEY_SEPARATOR_STR[] = {URI_SUFFIX_KEY_SEPARATOR, '\0'};
+static const char URI_PARAMETER_DELIMITER        = '.';
 
 /**
 Parse a comma separated list of integers greater than 0 from the specified
@@ -57,28 +56,32 @@ will have its corresponding bit in the bitset set.  Since the integers parsed
 out of s can not be 0, the index of a bit in the bitset for a given segment
 number n is n - 1.
 */
-static void parseSegmentNumbers(const std::string &s,
-                                boost::dynamic_bitset<> *result) {
+static void parseSegmentNumbers(const std::string &s, boost::dynamic_bitset<> *result)
+{
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
   boost::char_separator<char> sep(URI_SUFFIX_KEY_SEPARATOR_STR);
   tokenizer keyTokens(s.begin(), s.end(), sep);
-  auto i = keyTokens.begin();
+  auto i         = keyTokens.begin();
   const auto end = keyTokens.end();
-  while (i != end) {
-    unsigned segmentNumber = 0;
+  while (i != end)
+  {
+    unsigned segmentNumber          = 0;
     std::string segmentNumberString = *i;
     ++i;
-    try {
+    try
+    {
       segmentNumber = boost::lexical_cast<unsigned>(segmentNumberString);
       // 0 segment means nothing. Segment numbers
       // are 1 indexed, not 0 indexed.
       if (segmentNumber == 0)
         continue;
-      --segmentNumber; // convert to 0 indexing.
+      --segmentNumber;  // convert to 0 indexing.
       if (result->size() <= segmentNumber)
         result->resize(segmentNumber + 1, false);
       result->set(segmentNumber, true);
-    } catch (const boost::bad_lexical_cast &e) {
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
       // Ignore things we can't convert to an unsigned int.
     }
   }
@@ -113,7 +116,8 @@ together to build the business transaction name returned by this function.
 std::string transformNameWithURISegments(const std::string baseName,
                                          const std::string &urlPath,
                                          const std::string &suffixKey,
-                                         const std::string &delimiter) {
+                                         const std::string &delimiter)
+{
   std::string result;
   // as good as guess as any as to the size of the result...
   result.reserve(urlPath.length());
@@ -122,10 +126,9 @@ std::string transformNameWithURISegments(const std::string baseName,
   parseSegmentNumbers(suffixKey, &segmentNumbersBitSet);
 
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> sep(URI_SEGMENT_SEPARATOR_STR, "",
-                                  boost::keep_empty_tokens);
+  boost::char_separator<char> sep(URI_SEGMENT_SEPARATOR_STR, "", boost::keep_empty_tokens);
   tokenizer uriTokens(urlPath.begin(), urlPath.end(), sep);
-  auto i = uriTokens.begin();
+  auto i         = uriTokens.begin();
   const auto end = uriTokens.end();
 
   // Skip the first token if it exists and is an empty token.
@@ -136,8 +139,10 @@ std::string transformNameWithURISegments(const std::string baseName,
     ++i;
 
   unsigned currentSegmentNumber = 0;
-  while ((i != end) && (currentSegmentNumber < segmentNumbersBitSet.size())) {
-    if (segmentNumbersBitSet.test(currentSegmentNumber)) {
+  while ((i != end) && (currentSegmentNumber < segmentNumbersBitSet.size()))
+  {
+    if (segmentNumbersBitSet.test(currentSegmentNumber))
+    {
       if (!result.empty())
         result += delimiter;
       result += *i;

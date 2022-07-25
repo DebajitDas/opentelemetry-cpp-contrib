@@ -37,17 +37,18 @@ string.
 @param nSegments The number of segments to iterate past.
 @return An iterator pointing to the character that starts the nSegments segment.
 */
-template <class t_StringIteratorType, class t_CharType,
-          t_CharType segmentSeparator>
+template <class t_StringIteratorType, class t_CharType, t_CharType segmentSeparator>
 t_StringIteratorType findNthSegment(const t_StringIteratorType &start,
                                     const t_StringIteratorType &limit,
-                                    unsigned nSegments) {
+                                    unsigned nSegments)
+{
   t_StringIteratorType current = start;
   if (*current == segmentSeparator)
     ++current;
 
   unsigned currentSegment = 0;
-  while (current != limit) {
+  while (current != limit)
+  {
     if (*current == segmentSeparator)
       ++currentSegment;
     if (currentSegment == nSegments)
@@ -72,14 +73,15 @@ string.
 the returned string
 @return A string containing the first nSegments segments of s.
 */
-template <class t_StringType, class t_CharType = char,
+template <class t_StringType,
+          class t_CharType            = char,
           t_CharType segmentSeparator = URI_SEGMENT_SEPARATOR,
-          class t_StringIteratorType = typename t_StringType::const_iterator>
-t_StringType getFirstNSegments(const t_StringType &s, unsigned nSegments) {
+          class t_StringIteratorType  = typename t_StringType::const_iterator>
+t_StringType getFirstNSegments(const t_StringType &s, unsigned nSegments)
+{
   auto start = s.begin();
   auto endOfNthSegment =
-      findNthSegment<t_StringIteratorType, t_CharType, segmentSeparator>(
-          start, s.end(), nSegments);
+      findNthSegment<t_StringIteratorType, t_CharType, segmentSeparator>(start, s.end(), nSegments);
   return t_StringType(start, endOfNthSegment);
 }
 
@@ -98,16 +100,17 @@ string.
 the returned string
 @return A string containing the first nSegments segments of s.
 */
-template <
-    class t_StringType, class t_CharType = char,
-    t_CharType segmentSeparator = URI_SEGMENT_SEPARATOR,
-    class t_StringIteratorType = typename t_StringType::const_reverse_iterator>
-t_StringType getLastNSegments(const t_StringType &s, unsigned nSegments) {
-  auto start = s.rbegin();
-  auto endOfNthSegment =
-      findNthSegment<t_StringIteratorType, t_CharType, segmentSeparator>(
-          start, s.rend(), nSegments);
-  if (endOfNthSegment != s.rend()) {
+template <class t_StringType,
+          class t_CharType            = char,
+          t_CharType segmentSeparator = URI_SEGMENT_SEPARATOR,
+          class t_StringIteratorType  = typename t_StringType::const_reverse_iterator>
+t_StringType getLastNSegments(const t_StringType &s, unsigned nSegments)
+{
+  auto start           = s.rbegin();
+  auto endOfNthSegment = findNthSegment<t_StringIteratorType, t_CharType, segmentSeparator>(
+      start, s.rend(), nSegments);
+  if (endOfNthSegment != s.rend())
+  {
     ++endOfNthSegment;
   }
   return t_StringType(endOfNthSegment.base(), start.base());

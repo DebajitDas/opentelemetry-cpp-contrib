@@ -13,40 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "mocks/mock_OpenTelemetry.h"
-#include "mocks/mock_SdkHelperFactory.h"
-#include "sdkwrapper/ScopedSpan.h"
 #include "sdkwrapper/ServerSpan.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <opentelemetry/common/key_value_iterable_view.h>
+#include "mocks/mock_OpenTelemetry.h"
+#include "mocks/mock_SdkHelperFactory.h"
+#include "sdkwrapper/ScopedSpan.h"
 
 using ::testing::Return;
 using namespace appd::core::sdkwrapper;
 using ::testing::_;
 
-MATCHER_P(HasLongIntValue, value, "") {
+MATCHER_P(HasLongIntValue, value, "")
+{
   return nostd::get<int64_t>(arg) == value;
 }
 
-TEST(ServerSpan, ServerSpan_Create) {
+TEST(ServerSpan, ServerSpan_Create)
+{
   MockSdkHelperFactory mockSdkHelperFactory;
   appd::core::OtelPropagators testOtelPropagators;
-  testOtelPropagators.push_back(
-      std::unique_ptr<MockPropagator>(new MockPropagator()));
-  MockPropagator *mockPropagator =
-      dynamic_cast<MockPropagator *>(testOtelPropagators[0].get());
+  testOtelPropagators.push_back(std::unique_ptr<MockPropagator>(new MockPropagator()));
+  MockPropagator *mockPropagator = dynamic_cast<MockPropagator *>(testOtelPropagators[0].get());
   testing::Mock::AllowLeak(mockPropagator);
 
-  nostd::string_view testkey1 = "TestKey1";
+  nostd::string_view testkey1     = "TestKey1";
   nostd::string_view testSpanName = "TestSpanName";
-  auto kind = trace::SpanKind::kServer;
+  auto kind                       = trace::SpanKind::kServer;
 
-  std::unordered_map<std::string, std::string> carrier{
-      {"TestKey", "TestValue"}};
+  std::unordered_map<std::string, std::string> carrier{{"TestKey", "TestValue"}};
   int64_t testvalue = 100;
-  std::unordered_map<std::string, common::AttributeValue> attributes{
-      {"TestKey1", testvalue}};
+  std::unordered_map<std::string, common::AttributeValue> attributes{{"TestKey1", testvalue}};
 
   nostd::shared_ptr<MockSpan> testOtelSpan(new MockSpan());
   nostd::shared_ptr<MockTracer> testTracer(new MockTracer());
@@ -56,46 +54,38 @@ TEST(ServerSpan, ServerSpan_Create) {
   EXPECT_CALL(*mockPropagator, ExtractImpl(_)).Times(1);
   EXPECT_CALL(mockSdkHelperFactory, GetPropagators())
       .Times(1)
-      .WillOnce(InvokeWithoutArgs([&]() -> appd::core::OtelPropagators & {
-        return testOtelPropagators;
-      }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::OtelPropagators & { return testOtelPropagators; }));
 
-  EXPECT_CALL(*testTracer,
-              VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue)))
-      .Times(1);
+  EXPECT_CALL(*testTracer, VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue))).Times(1);
   EXPECT_CALL(*testTracer, StartSpanInternal(testSpanName, kind))
       .Times(1)
-      .WillOnce(InvokeWithoutArgs(
-          [&]() -> nostd::shared_ptr<MockSpan> { return testOtelSpan; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> nostd::shared_ptr<MockSpan> { return testOtelSpan; }));
 
   EXPECT_CALL(mockSdkHelperFactory, GetTracer())
       .Times(1)
-      .WillRepeatedly(InvokeWithoutArgs(
-          [&]() -> nostd::shared_ptr<MockTracer> { return testTracer; }));
+      .WillRepeatedly(
+          InvokeWithoutArgs([&]() -> nostd::shared_ptr<MockTracer> { return testTracer; }));
 
   AgentLogger logger = getLogger("Test");
-  ServerSpan testSpan("TestSpanName", attributes, carrier,
-                      &mockSdkHelperFactory, logger);
+  ServerSpan testSpan("TestSpanName", attributes, carrier, &mockSdkHelperFactory, logger);
 }
 
-TEST(ServerSpan, ServerSpan_End) {
+TEST(ServerSpan, ServerSpan_End)
+{
   MockSdkHelperFactory mockSdkHelperFactory;
   appd::core::OtelPropagators testOtelPropagators;
-  testOtelPropagators.push_back(
-      std::unique_ptr<MockPropagator>(new MockPropagator()));
-  MockPropagator *mockPropagator =
-      dynamic_cast<MockPropagator *>(testOtelPropagators[0].get());
+  testOtelPropagators.push_back(std::unique_ptr<MockPropagator>(new MockPropagator()));
+  MockPropagator *mockPropagator = dynamic_cast<MockPropagator *>(testOtelPropagators[0].get());
   testing::Mock::AllowLeak(mockPropagator);
 
-  nostd::string_view testkey1 = "TestKey1";
+  nostd::string_view testkey1     = "TestKey1";
   nostd::string_view testSpanName = "TestSpanName";
-  auto kind = trace::SpanKind::kServer;
+  auto kind                       = trace::SpanKind::kServer;
 
-  std::unordered_map<std::string, std::string> carrier{
-      {"TestKey", "TestValue"}};
+  std::unordered_map<std::string, std::string> carrier{{"TestKey", "TestValue"}};
   int64_t testvalue = 100;
-  std::unordered_map<std::string, common::AttributeValue> attributes{
-      {"TestKey1", testvalue}};
+  std::unordered_map<std::string, common::AttributeValue> attributes{{"TestKey1", testvalue}};
 
   nostd::shared_ptr<MockSpan> testOtelSpan(new MockSpan());
   nostd::shared_ptr<MockTracer> testTracer(new MockTracer());
@@ -105,49 +95,41 @@ TEST(ServerSpan, ServerSpan_End) {
   EXPECT_CALL(*mockPropagator, ExtractImpl(_)).Times(1);
   EXPECT_CALL(mockSdkHelperFactory, GetPropagators())
       .Times(1)
-      .WillOnce(InvokeWithoutArgs([&]() -> appd::core::OtelPropagators & {
-        return testOtelPropagators;
-      }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::OtelPropagators & { return testOtelPropagators; }));
 
-  EXPECT_CALL(*testTracer,
-              VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue)))
-      .Times(1);
+  EXPECT_CALL(*testTracer, VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue))).Times(1);
   EXPECT_CALL(*testTracer, StartSpanInternal(testSpanName, kind))
       .Times(1)
-      .WillOnce(InvokeWithoutArgs(
-          [&]() -> nostd::shared_ptr<MockSpan> { return testOtelSpan; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> nostd::shared_ptr<MockSpan> { return testOtelSpan; }));
 
   EXPECT_CALL(mockSdkHelperFactory, GetTracer())
       .Times(1)
-      .WillRepeatedly(InvokeWithoutArgs(
-          [&]() -> nostd::shared_ptr<MockTracer> { return testTracer; }));
+      .WillRepeatedly(
+          InvokeWithoutArgs([&]() -> nostd::shared_ptr<MockTracer> { return testTracer; }));
 
   AgentLogger logger = getLogger("Test");
-  ServerSpan testServerSpan("TestSpanName", attributes, carrier,
-                            &mockSdkHelperFactory, logger);
+  ServerSpan testServerSpan("TestSpanName", attributes, carrier, &mockSdkHelperFactory, logger);
   using ::testing::_;
   EXPECT_CALL(*testOtelSpan, End(_)).Times(1);
   testServerSpan.End();
 }
 
-TEST(ServerSpan, ServerSpan_AddEvent) {
+TEST(ServerSpan, ServerSpan_AddEvent)
+{
   MockSdkHelperFactory mockSdkHelperFactory;
   appd::core::OtelPropagators testOtelPropagators;
-  testOtelPropagators.push_back(
-      std::unique_ptr<MockPropagator>(new MockPropagator()));
-  MockPropagator *mockPropagator =
-      dynamic_cast<MockPropagator *>(testOtelPropagators[0].get());
+  testOtelPropagators.push_back(std::unique_ptr<MockPropagator>(new MockPropagator()));
+  MockPropagator *mockPropagator = dynamic_cast<MockPropagator *>(testOtelPropagators[0].get());
   testing::Mock::AllowLeak(mockPropagator);
 
-  nostd::string_view testkey1 = "TestKey1";
+  nostd::string_view testkey1     = "TestKey1";
   nostd::string_view testSpanName = "TestSpanName";
-  auto kind = trace::SpanKind::kServer;
+  auto kind                       = trace::SpanKind::kServer;
 
-  std::unordered_map<std::string, std::string> carrier{
-      {"TestKey", "TestValue"}};
+  std::unordered_map<std::string, std::string> carrier{{"TestKey", "TestValue"}};
   int64_t testvalue = 100;
-  std::unordered_map<std::string, common::AttributeValue> attributes{
-      {"TestKey1", testvalue}};
+  std::unordered_map<std::string, common::AttributeValue> attributes{{"TestKey1", testvalue}};
 
   nostd::shared_ptr<MockSpan> testOtelSpan(new MockSpan());
   nostd::shared_ptr<MockTracer> testTracer(new MockTracer());
@@ -157,26 +139,21 @@ TEST(ServerSpan, ServerSpan_AddEvent) {
   EXPECT_CALL(*mockPropagator, ExtractImpl(_)).Times(1);
   EXPECT_CALL(mockSdkHelperFactory, GetPropagators())
       .Times(1)
-      .WillOnce(InvokeWithoutArgs([&]() -> appd::core::OtelPropagators & {
-        return testOtelPropagators;
-      }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::OtelPropagators & { return testOtelPropagators; }));
 
-  EXPECT_CALL(*testTracer,
-              VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue)))
-      .Times(1);
+  EXPECT_CALL(*testTracer, VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue))).Times(1);
   EXPECT_CALL(*testTracer, StartSpanInternal(testSpanName, kind))
       .Times(1)
-      .WillOnce(InvokeWithoutArgs(
-          [&]() -> nostd::shared_ptr<MockSpan> { return testOtelSpan; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> nostd::shared_ptr<MockSpan> { return testOtelSpan; }));
 
   EXPECT_CALL(mockSdkHelperFactory, GetTracer())
       .Times(1)
-      .WillRepeatedly(InvokeWithoutArgs(
-          [&]() -> nostd::shared_ptr<MockTracer> { return testTracer; }));
+      .WillRepeatedly(
+          InvokeWithoutArgs([&]() -> nostd::shared_ptr<MockTracer> { return testTracer; }));
 
   AgentLogger logger = getLogger("Test");
-  ServerSpan testServerSpan("TestSpanName", attributes, carrier,
-                            &mockSdkHelperFactory, logger);
+  ServerSpan testServerSpan("TestSpanName", attributes, carrier, &mockSdkHelperFactory, logger);
 
   std::string eventName{"TestEventName"};
   nostd::string_view eName{"TestEventName"};
@@ -184,30 +161,25 @@ TEST(ServerSpan, ServerSpan_AddEvent) {
   common::SystemTimestamp testTimeStamp(timePoint);
 
   EXPECT_CALL(*testOtelSpan, AddEvent(eName, testTimeStamp)).Times(1);
-  EXPECT_CALL(*testOtelSpan,
-              VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue)))
-      .Times(1);
+  EXPECT_CALL(*testOtelSpan, VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue))).Times(1);
   testServerSpan.AddEvent(eventName, timePoint, attributes);
 }
 
-TEST(ServerSpan, ServerSpan_AddAttribute) {
+TEST(ServerSpan, ServerSpan_AddAttribute)
+{
   MockSdkHelperFactory mockSdkHelperFactory;
   appd::core::OtelPropagators testOtelPropagators;
-  testOtelPropagators.push_back(
-      std::unique_ptr<MockPropagator>(new MockPropagator()));
-  MockPropagator *mockPropagator =
-      dynamic_cast<MockPropagator *>(testOtelPropagators[0].get());
+  testOtelPropagators.push_back(std::unique_ptr<MockPropagator>(new MockPropagator()));
+  MockPropagator *mockPropagator = dynamic_cast<MockPropagator *>(testOtelPropagators[0].get());
   testing::Mock::AllowLeak(mockPropagator);
 
-  nostd::string_view testkey1 = "TestKey1";
+  nostd::string_view testkey1     = "TestKey1";
   nostd::string_view testSpanName = "TestSpanName";
-  auto kind = trace::SpanKind::kServer;
+  auto kind                       = trace::SpanKind::kServer;
 
-  std::unordered_map<std::string, std::string> carrier{
-      {"TestKey", "TestValue"}};
+  std::unordered_map<std::string, std::string> carrier{{"TestKey", "TestValue"}};
   int64_t testvalue = 100;
-  std::unordered_map<std::string, common::AttributeValue> attributes{
-      {"TestKey1", testvalue}};
+  std::unordered_map<std::string, common::AttributeValue> attributes{{"TestKey1", testvalue}};
 
   nostd::shared_ptr<MockSpan> testOtelSpan(new MockSpan());
   nostd::shared_ptr<MockTracer> testTracer(new MockTracer());
@@ -217,28 +189,22 @@ TEST(ServerSpan, ServerSpan_AddAttribute) {
   EXPECT_CALL(*mockPropagator, ExtractImpl(_)).Times(1);
   EXPECT_CALL(mockSdkHelperFactory, GetPropagators())
       .Times(1)
-      .WillOnce(InvokeWithoutArgs([&]() -> appd::core::OtelPropagators & {
-        return testOtelPropagators;
-      }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::OtelPropagators & { return testOtelPropagators; }));
 
-  EXPECT_CALL(*testTracer,
-              VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue)))
-      .Times(1);
+  EXPECT_CALL(*testTracer, VerifyKeyValueIterable(testkey1, HasLongIntValue(testvalue))).Times(1);
   EXPECT_CALL(*testTracer, StartSpanInternal(testSpanName, kind))
       .Times(1)
-      .WillOnce(InvokeWithoutArgs(
-          [&]() -> nostd::shared_ptr<MockSpan> { return testOtelSpan; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> nostd::shared_ptr<MockSpan> { return testOtelSpan; }));
 
   EXPECT_CALL(mockSdkHelperFactory, GetTracer())
       .Times(1)
-      .WillRepeatedly(InvokeWithoutArgs(
-          [&]() -> nostd::shared_ptr<MockTracer> { return testTracer; }));
+      .WillRepeatedly(
+          InvokeWithoutArgs([&]() -> nostd::shared_ptr<MockTracer> { return testTracer; }));
 
   AgentLogger logger = getLogger("Test");
-  ServerSpan testServerSpan("TestSpanName", attributes, carrier,
-                            &mockSdkHelperFactory, logger);
+  ServerSpan testServerSpan("TestSpanName", attributes, carrier, &mockSdkHelperFactory, logger);
 
-  EXPECT_CALL(*testOtelSpan, SetAttribute(testkey1, HasLongIntValue(testvalue)))
-      .Times(1);
+  EXPECT_CALL(*testOtelSpan, SetAttribute(testkey1, HasLongIntValue(testvalue))).Times(1);
   testServerSpan.AddAttribute("TestKey1", testvalue);
 }

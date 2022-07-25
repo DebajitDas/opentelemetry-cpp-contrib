@@ -16,10 +16,11 @@
 #ifndef __MOCKSDKHELPERFACTORY_H
 #define __MOCKSDKHELPERFACTORY_H
 
-#include "sdkwrapper/ISdkHelperFactory.h"
 #include <gmock/gmock.h>
+#include "sdkwrapper/ISdkHelperFactory.h"
 
-class MockSdkHelperFactory : public appd::core::sdkwrapper::ISdkHelperFactory {
+class MockSdkHelperFactory : public appd::core::sdkwrapper::ISdkHelperFactory
+{
 public:
   MOCK_METHOD(appd::core::OtelTracer, GetTracer, (), (override));
   MOCK_METHOD(appd::core::OtelPropagators &, GetPropagators, (), (override));

@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "api/Payload.h"
 #include "api/RequestProcessingEngine.h"
-#include "api/TenantConfig.h"
-#include "mocks/mock_sdkwrapper.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "api/Payload.h"
+#include "api/TenantConfig.h"
+#include "mocks/mock_sdkwrapper.h"
 
 #include <unordered_map>
 
-class FakeRequestProcessingEngine : appd::core::RequestProcessingEngine {
+class FakeRequestProcessingEngine : appd::core::RequestProcessingEngine
+{
 public:
   using Base = appd::core::RequestProcessingEngine;
   using Base::endInteraction;
@@ -31,42 +32,47 @@ public:
   using Base::startRequest;
   FakeRequestProcessingEngine() = default;
   void init(std::shared_ptr<appd::core::TenantConfig> &config,
-            std::shared_ptr<appd::core::SpanNamer> spanNamer) override {
+            std::shared_ptr<appd::core::SpanNamer> spanNamer) override
+  {
     m_sdkWrapper.reset(new MockSdkWrapper);
     m_spanNamer = spanNamer;
   }
 
-  MockSdkWrapper *getMockSdkWrapper() {
-    return (MockSdkWrapper *)(m_sdkWrapper.get());
-  }
+  MockSdkWrapper *getMockSdkWrapper() { return (MockSdkWrapper *)(m_sdkWrapper.get()); }
 };
 
 using ::testing::Return;
 
-MATCHER_P(HasStringVal, value, "") {
-  return opentelemetry::nostd::get<opentelemetry::nostd::string_view>(arg) ==
-         value;
+MATCHER_P(HasStringVal, value, "")
+{
+  return opentelemetry::nostd::get<opentelemetry::nostd::string_view>(arg) == value;
 }
 
-MATCHER_P(HasMapVal, value, "") {
+MATCHER_P(HasMapVal, value, "")
+{
 
   using namespace opentelemetry;
   appd::core::sdkwrapper::OtelKeyValueMap argkeyValueMap = arg;
-  bool valueMatches = true;
-  for (auto &argKey : argkeyValueMap) {
+  bool valueMatches                                      = true;
+  for (auto &argKey : argkeyValueMap)
+  {
 
     auto argkeyValue = argKey.second;
-    auto keyValue = argkeyValue;
-    auto itr = value.find(argKey.first);
+    auto keyValue    = argkeyValue;
+    auto itr         = value.find(argKey.first);
 
-    if (itr != value.end()) {
+    if (itr != value.end())
+    {
       keyValue = itr->second;
-    } else {
+    }
+    else
+    {
       valueMatches = false;
       break;
     }
 
-    if (keyValue.index() != argkeyValue.index()) {
+    if (keyValue.index() != argkeyValue.index())
+    {
       valueMatches = false;
       break;
     }
@@ -74,20 +80,28 @@ MATCHER_P(HasMapVal, value, "") {
     /* Only for data types have been covered pertaining to this Test but if
        needed more if-else for other data types have to be added*/
 
-    if (nostd::holds_alternative<int64_t>(keyValue)) {
-      if (nostd::get<int64_t>(argkeyValue) != nostd::get<int64_t>(keyValue)) {
+    if (nostd::holds_alternative<int64_t>(keyValue))
+    {
+      if (nostd::get<int64_t>(argkeyValue) != nostd::get<int64_t>(keyValue))
+      {
         valueMatches = false;
       }
-    } else if (nostd::holds_alternative<nostd::string_view>(keyValue)) {
+    }
+    else if (nostd::holds_alternative<nostd::string_view>(keyValue))
+    {
 
-      if (nostd::get<nostd::string_view>(argkeyValue) !=
-          nostd::get<nostd::string_view>(keyValue)) {
+      if (nostd::get<nostd::string_view>(argkeyValue) != nostd::get<nostd::string_view>(keyValue))
+      {
         valueMatches = false;
       }
-    } else if (nostd::holds_alternative<int32_t>(keyValue)) {
+    }
+    else if (nostd::holds_alternative<int32_t>(keyValue))
+    {
       if (nostd::get<int32_t>(argkeyValue) != nostd::get<int32_t>(keyValue))
         valueMatches = false;
-    } else if (nostd::holds_alternative<bool>(keyValue)) {
+    }
+    else if (nostd::holds_alternative<bool>(keyValue))
+    {
       if (nostd::get<bool>(argkeyValue) != nostd::get<bool>(keyValue))
         valueMatches = false;
     }
@@ -96,20 +110,24 @@ MATCHER_P(HasMapVal, value, "") {
   return valueMatches;
 }
 
-MATCHER_P(HasIntValue, value, "") {
+MATCHER_P(HasIntValue, value, "")
+{
   return opentelemetry::nostd::get<int>(arg) == value;
 }
 
-MATCHER_P(HasLongIntValue, value, "") {
+MATCHER_P(HasLongIntValue, value, "")
+{
 
   return opentelemetry::nostd::get<int64_t>(arg) == value;
 }
 
-MATCHER_P(HasBoolValue, value, "") {
+MATCHER_P(HasBoolValue, value, "")
+{
   return opentelemetry::nostd::get<bool>(arg) == value;
 }
 
-TEST(TestRequestProcessingEngine, StartRequest) {
+TEST(TestRequestProcessingEngine, StartRequest)
+{
   FakeRequestProcessingEngine engine;
   std::shared_ptr<appd::core::TenantConfig> config;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
@@ -129,14 +147,13 @@ TEST(TestRequestProcessingEngine, StartRequest) {
   span.reset(new MockScopedSpan);
 
   // sdkwrapper's create span function should be called
-  EXPECT_CALL(*sdkWrapper,
-              CreateSpan("dummy_span", appd::core::sdkwrapper::SpanKind::SERVER,
-                         HasMapVal(keyValueMap), payload.get_http_headers()))
+  EXPECT_CALL(*sdkWrapper, CreateSpan("dummy_span", appd::core::sdkwrapper::SpanKind::SERVER,
+                                      HasMapVal(keyValueMap), payload.get_http_headers()))
       .WillOnce(Return(span));
 
-  int *dummy = new int(2);
+  int *dummy      = new int(2);
   void *reqHandle = dummy;
-  auto res = engine.startRequest("ws_context", &payload, &reqHandle);
+  auto res        = engine.startRequest("ws_context", &payload, &reqHandle);
   EXPECT_EQ(res, APPD_SUCCESS);
 
   auto *reqContext = (appd::core::RequestContext *)(reqHandle);
@@ -148,7 +165,8 @@ TEST(TestRequestProcessingEngine, StartRequest) {
   delete (dummy);
 }
 
-TEST(TestRequestProcessingEngine, StartRequestInvalidParams) {
+TEST(TestRequestProcessingEngine, StartRequestInvalidParams)
+{
   FakeRequestProcessingEngine engine;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
   std::shared_ptr<appd::core::TenantConfig> config;
@@ -161,14 +179,15 @@ TEST(TestRequestProcessingEngine, StartRequestInvalidParams) {
   auto res = engine.startRequest("ws_context", &payload, nullptr);
   EXPECT_EQ(res, APPD_STATUS(handle_pointer_is_null));
 
-  int *intPtr = new int(2);
+  int *intPtr     = new int(2);
   void *reqHandle = intPtr;
-  res = engine.startRequest("ws_context", nullptr, &reqHandle);
+  res             = engine.startRequest("ws_context", nullptr, &reqHandle);
   EXPECT_EQ(res, APPD_STATUS(payload_reflector_is_null));
   delete (intPtr);
 }
 
-TEST(TestRequestProcessingEngine, EndRequest) {
+TEST(TestRequestProcessingEngine, EndRequest)
+{
   FakeRequestProcessingEngine engine;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
   std::shared_ptr<appd::core::TenantConfig> config;
@@ -180,17 +199,15 @@ TEST(TestRequestProcessingEngine, EndRequest) {
   auto *rContext = new appd::core::RequestContext(rootSpan);
 
   // adding some unfinished interactions
-  std::shared_ptr<appd::core::sdkwrapper::IScopedSpan> interactionSpan1,
-      interactionSpan2;
+  std::shared_ptr<appd::core::sdkwrapper::IScopedSpan> interactionSpan1, interactionSpan2;
   interactionSpan1.reset(new MockScopedSpan);
   interactionSpan2.reset(new MockScopedSpan);
   rContext->addInteraction(interactionSpan1);
   rContext->addInteraction(interactionSpan2);
 
-  auto getMockSpan =
-      [](std::shared_ptr<appd::core::sdkwrapper::IScopedSpan> span) {
-        return (MockScopedSpan *)(span.get());
-      };
+  auto getMockSpan = [](std::shared_ptr<appd::core::sdkwrapper::IScopedSpan> span) {
+    return (MockScopedSpan *)(span.get());
+  };
 
   // interactionSpans' End should be called in LIFO order followed by root span.
   EXPECT_CALL(*getMockSpan(interactionSpan2), End()).Times(1);
@@ -198,8 +215,7 @@ TEST(TestRequestProcessingEngine, EndRequest) {
   EXPECT_CALL(*getMockSpan(interactionSpan1), End()).Times(1);
 
   EXPECT_CALL(*getMockSpan(rootSpan),
-              SetStatus(appd::core::sdkwrapper::StatusCode::Error,
-                        "HTTP ERROR CODE:403"))
+              SetStatus(appd::core::sdkwrapper::StatusCode::Error, "HTTP ERROR CODE:403"))
       .Times(1);
 
   EXPECT_CALL(*getMockSpan(rootSpan), End()).Times(1);
@@ -208,7 +224,8 @@ TEST(TestRequestProcessingEngine, EndRequest) {
   EXPECT_EQ(res, APPD_SUCCESS);
 }
 
-TEST(TestRequestProcessingEngine, EndRequestInvalidParams) {
+TEST(TestRequestProcessingEngine, EndRequestInvalidParams)
+{
   FakeRequestProcessingEngine engine;
   std::shared_ptr<appd::core::TenantConfig> config;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
@@ -219,7 +236,8 @@ TEST(TestRequestProcessingEngine, EndRequestInvalidParams) {
   EXPECT_EQ(res, APPD_STATUS(fail));
 }
 
-TEST(TestRequestProcessingEngine, StartInteraction) {
+TEST(TestRequestProcessingEngine, StartInteraction)
+{
   FakeRequestProcessingEngine engine;
   std::shared_ptr<appd::core::TenantConfig> config;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
@@ -229,7 +247,7 @@ TEST(TestRequestProcessingEngine, StartInteraction) {
 
   appd::core::InteractionPayload payload;
   payload.moduleName = "module";
-  payload.phaseName = "phase";
+  payload.phaseName  = "phase";
 
   appd::core::sdkwrapper::OtelKeyValueMap keyValueMap;
   keyValueMap["interactionType"] = "EXIT_CALL";
@@ -242,28 +260,26 @@ TEST(TestRequestProcessingEngine, StartInteraction) {
 
   // sdkwrapper's create span function should be called
   using testing::_;
-  EXPECT_CALL(*sdkWrapper, CreateSpan("module_phase",
-                                      appd::core::sdkwrapper::SpanKind::CLIENT,
+  EXPECT_CALL(*sdkWrapper, CreateSpan("module_phase", appd::core::sdkwrapper::SpanKind::CLIENT,
                                       HasMapVal(keyValueMap), emptyHeaders))
       .WillOnce(Return(span));
 
   // call to populatePropagationHeader of sdkWrapper
-  EXPECT_CALL(*sdkWrapper, PopulatePropagationHeaders(propagationHeaders))
-      .Times(1);
+  EXPECT_CALL(*sdkWrapper, PopulatePropagationHeaders(propagationHeaders)).Times(1);
 
   std::shared_ptr<appd::core::sdkwrapper::IScopedSpan> rootSpan;
   rootSpan.reset(new MockScopedSpan);
   auto *rContext = new appd::core::RequestContext(rootSpan);
 
-  auto res =
-      engine.startInteraction((void *)(rContext), &payload, propagationHeaders);
+  auto res = engine.startInteraction((void *)(rContext), &payload, propagationHeaders);
   EXPECT_EQ(res, APPD_SUCCESS);
 
   // Interaction will be added in requestContext
   EXPECT_TRUE(rContext->hasActiveInteraction());
 }
 
-TEST(TestRequestProcessingEngine, StartInteractionInvalidParams) {
+TEST(TestRequestProcessingEngine, StartInteractionInvalidParams)
+{
   FakeRequestProcessingEngine engine;
   std::shared_ptr<appd::core::TenantConfig> config;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
@@ -283,12 +299,12 @@ TEST(TestRequestProcessingEngine, StartInteractionInvalidParams) {
   auto *rContext = new appd::core::RequestContext(rootSpan);
 
   // invalid payload
-  res =
-      engine.startInteraction((void *)(rContext), nullptr, propagationHeaders);
+  res = engine.startInteraction((void *)(rContext), nullptr, propagationHeaders);
   EXPECT_EQ(res, APPD_STATUS(payload_reflector_is_null));
 }
 
-TEST(TestRequestProcessingEngine, EndInteraction) {
+TEST(TestRequestProcessingEngine, EndInteraction)
+{
   FakeRequestProcessingEngine engine;
   std::shared_ptr<appd::core::TenantConfig> config;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
@@ -306,8 +322,8 @@ TEST(TestRequestProcessingEngine, EndInteraction) {
   rContext->addInteraction(interactionSpan);
 
   appd::core::EndInteractionPayload payload;
-  payload.errorCode = 403;
-  payload.errorMsg = "error_msg";
+  payload.errorCode   = 403;
+  payload.errorMsg    = "error_msg";
   payload.backendName = "backend_one";
   payload.backendType = "backend_type";
 
@@ -315,8 +331,7 @@ TEST(TestRequestProcessingEngine, EndInteraction) {
   EXPECT_CALL(*(MockScopedSpan *)(span.get()),
               SetStatus(appd::core::sdkwrapper::StatusCode::Error, "error_msg"))
       .Times(1);
-  EXPECT_CALL(*(MockScopedSpan *)(span.get()),
-              AddAttribute("error_code", HasLongIntValue(403)))
+  EXPECT_CALL(*(MockScopedSpan *)(span.get()), AddAttribute("error_code", HasLongIntValue(403)))
       .Times(1);
 
   EXPECT_CALL(*(MockScopedSpan *)(span.get()),
@@ -333,7 +348,8 @@ TEST(TestRequestProcessingEngine, EndInteraction) {
   EXPECT_EQ(res, APPD_SUCCESS);
 }
 
-TEST(TestRequestProcessingEngine, EndInteractionInvalidParams) {
+TEST(TestRequestProcessingEngine, EndInteractionInvalidParams)
+{
   FakeRequestProcessingEngine engine;
   std::shared_ptr<appd::core::TenantConfig> config;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();

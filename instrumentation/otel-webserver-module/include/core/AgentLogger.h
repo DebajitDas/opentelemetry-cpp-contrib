@@ -17,11 +17,11 @@
 #ifndef __LOGGER_H_
 #define __LOGGER_H_
 
+#include <log4cxx/logger.h>
+#include <log4cxx/logmanager.h>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <iostream>
-#include <log4cxx/logger.h>
-#include <log4cxx/logmanager.h>
 #include <string>
 
 typedef log4cxx::LoggerPtr AgentLogger;
@@ -31,27 +31,28 @@ AgentLogger getLogger(const std::string &name);
 
 /* this is cloned from log4cxx locationinfo.h */
 #if defined(_MSC_VER)
-#if _MSC_VER >= 1300
-#define __LOG4CXX_FUNC__ __FUNCSIG__
-#endif
+#  if _MSC_VER >= 1300
+#    define __LOG4CXX_FUNC__ __FUNCSIG__
+#  endif
 #else
-#if defined(__GNUC__)
-#define __LOG4CXX_FUNC__ __PRETTY_FUNCTION__
-#endif
+#  if defined(__GNUC__)
+#    define __LOG4CXX_FUNC__ __PRETTY_FUNCTION__
+#  endif
 #endif
 #if !defined(__LOG4CXX_FUNC__)
-#define __LOG4CXX_FUNC__ ""
+#  define __LOG4CXX_FUNC__ ""
 #endif
 /* */
 
 #ifdef _WIN32
-#undef ERROR
+#  undef ERROR
 #endif
 
 /*
  *TODO: Change the following context names while writing the core logic.*
  */
-struct LogContext {
+struct LogContext
+{
   static const char *AGENT;
   static const char *TX_SERVICE;
   static const char *CONFIG;
@@ -70,20 +71,21 @@ struct LogContext {
  * reset it back to normal.
  * It can be used in future to forcefully adjust the logging level.
  */
-class DebugLoggingManager {
+class DebugLoggingManager
+{
 public:
-  inline static void enable() {
-    log4cxx::spi::LoggerRepositoryPtr repository(
-        log4cxx::LogManager::getLoggerRepository());
+  inline static void enable()
+  {
+    log4cxx::spi::LoggerRepositoryPtr repository(log4cxx::LogManager::getLoggerRepository());
     m_previousLogLevel = repository->getThreshold();
     if (!m_previousLogLevel->equals(log4cxx::Level::getDebug()))
       repository->setThreshold(log4cxx::Level::getDebug());
   }
 
-  inline static void reset() {
+  inline static void reset()
+  {
     if (m_previousLogLevel)
-      log4cxx::LogManager::getLoggerRepository()->setThreshold(
-          m_previousLogLevel);
+      log4cxx::LogManager::getLoggerRepository()->setThreshold(m_previousLogLevel);
   }
 
 private:
@@ -92,11 +94,13 @@ private:
 };
 
 template <class charT, class Traits>
-inline void logStartupError(const boost::basic_format<charT, Traits> &f) {
+inline void logStartupError(const boost::basic_format<charT, Traits> &f)
+{
   std::cerr << f << std::endl;
 }
 
-inline void logStartupError(const char *message) {
+inline void logStartupError(const char *message)
+{
   std::cerr << message << std::endl;
 }
 

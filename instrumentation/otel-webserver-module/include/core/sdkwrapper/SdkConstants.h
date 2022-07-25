@@ -15,20 +15,23 @@
  */
 #pragma once
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
-const std::string kServiceName = "service.name";
-const std::string kServiceNamespace = "service.namespace";
-const std::string kServiceInstanceId = "service.instance.id";
-const std::string kOtelLibraryName = "telemetry.sdk.language";
+const std::string kServiceName        = "service.name";
+const std::string kServiceNamespace   = "service.namespace";
+const std::string kServiceInstanceId  = "service.instance.id";
+const std::string kOtelLibraryName    = "telemetry.sdk.language";
 const std::string kOtelLibraryVersion = "telemetry.sdk.version";
-const std::string kHttpErrorCode = "HTTP ERROR CODE:";
-constexpr int HTTP_ERROR_1XX = 100;
-constexpr int HTTP_ERROR_4XX = 400;
-constexpr int HTTP_ERROR_5XX = 500;
+const std::string kHttpErrorCode      = "HTTP ERROR CODE:";
+constexpr int HTTP_ERROR_1XX          = 100;
+constexpr int HTTP_ERROR_4XX          = 400;
+constexpr int HTTP_ERROR_5XX          = 500;
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd

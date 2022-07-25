@@ -17,11 +17,6 @@
 #ifndef __SDKHELPERFACTORY_H
 #define __SDKHELPERFACTORY_H
 
-#include "AgentLogger.h"
-#include "opentelemetry/trace/tracer_provider.h"
-#include "sdkwrapper/ISdkHelperFactory.h"
-#include "sdkwrapper/ISdkWrapper.h"
-#include <memory>
 #include <opentelemetry/context/propagation/text_map_propagator.h>
 #include <opentelemetry/exporters/ostream/span_exporter.h>
 #include <opentelemetry/nostd/shared_ptr.h>
@@ -30,26 +25,31 @@
 #include <opentelemetry/sdk/trace/sampler.h>
 #include <opentelemetry/trace/propagation/http_trace_context.h>
 #include <opentelemetry/trace/tracer.h>
+#include <memory>
 #include <unordered_map>
 #include <vector>
+#include "AgentLogger.h"
+#include "opentelemetry/trace/tracer_provider.h"
+#include "sdkwrapper/ISdkHelperFactory.h"
+#include "sdkwrapper/ISdkWrapper.h"
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
 using namespace opentelemetry;
-using OtelSpanExporter =
-    std::unique_ptr<opentelemetry::sdk::trace::SpanExporter>;
-using OtelSpanProcessor =
-    std::unique_ptr<opentelemetry::sdk::trace::SpanProcessor>;
-using OtelSampler = std::unique_ptr<opentelemetry::sdk::trace::Sampler>;
-using OtelTracerProvider =
-    opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>;
+using OtelSpanExporter   = std::unique_ptr<opentelemetry::sdk::trace::SpanExporter>;
+using OtelSpanProcessor  = std::unique_ptr<opentelemetry::sdk::trace::SpanProcessor>;
+using OtelSampler        = std::unique_ptr<opentelemetry::sdk::trace::Sampler>;
+using OtelTracerProvider = opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>;
 
-class SdkHelperFactory : public ISdkHelperFactory {
+class SdkHelperFactory : public ISdkHelperFactory
+{
 public:
-  SdkHelperFactory(std::shared_ptr<TenantConfig> config,
-                   const AgentLogger &logger);
+  SdkHelperFactory(std::shared_ptr<TenantConfig> config, const AgentLogger &logger);
 
   OtelTracer GetTracer() override;
 
@@ -72,8 +72,8 @@ private:
   const AgentLogger &mLogger;
 };
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd
 
 #endif

@@ -17,50 +17,61 @@
 #include "sdkwrapper/ServerSpan.h"
 #include "sdkwrapper/ScopedSpan.h"
 #include "sdkwrapper/SdkUtils.h"
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
-ServerSpan::ServerSpan(
-    const std::string &name, const OtelKeyValueMap &attributes,
-    const std::unordered_map<std::string, std::string> &carrier,
-    ISdkHelperFactory *sdkHelperFactory, const AgentLogger &logger)
-    : mLogger(logger) {
+ServerSpan::ServerSpan(const std::string &name,
+                       const OtelKeyValueMap &attributes,
+                       const std::unordered_map<std::string, std::string> &carrier,
+                       ISdkHelperFactory *sdkHelperFactory,
+                       const AgentLogger &logger)
+    : mLogger(logger)
+{
   // Extract W3C Trace Context. And store the token in local variable.
   context::Context ctx = context::RuntimeContext::GetCurrent();
   OtelCarrier otelCarrier(carrier);
-  for (auto &propagator : sdkHelperFactory->GetPropagators()) {
+  for (auto &propagator : sdkHelperFactory->GetPropagators())
+  {
     ctx = propagator->Extract(otelCarrier, ctx);
   }
   mToken = context::RuntimeContext::Attach(ctx);
 
-  mScopedSpan.reset(new ScopedSpan(name, trace::SpanKind::kServer, attributes,
-                                   sdkHelperFactory, mLogger));
+  mScopedSpan.reset(
+      new ScopedSpan(name, trace::SpanKind::kServer, attributes, sdkHelperFactory, mLogger));
 }
 
-void ServerSpan::End() {
+void ServerSpan::End()
+{
   context::RuntimeContext::Detach(*mToken.get());
   mScopedSpan->End();
 }
 
-void ServerSpan::AddEvent(
-    const std::string &name,
-    const std::chrono::system_clock::time_point &timePoint,
-    const OtelKeyValueMap &attributes) {
+void ServerSpan::AddEvent(const std::string &name,
+                          const std::chrono::system_clock::time_point &timePoint,
+                          const OtelKeyValueMap &attributes)
+{
   mScopedSpan->AddEvent(name, timePoint, attributes);
 }
 
-void ServerSpan::AddAttribute(const std::string &key,
-                              const common::AttributeValue &value) {
+void ServerSpan::AddAttribute(const std::string &key, const common::AttributeValue &value)
+{
   mScopedSpan->AddAttribute(key, value);
 }
 
-void ServerSpan::SetStatus(const StatusCode status, const std::string &desc) {
+void ServerSpan::SetStatus(const StatusCode status, const std::string &desc)
+{
   mScopedSpan->SetStatus(status, desc);
 }
 
-SpanKind ServerSpan::GetSpanKind() { return SpanKind::SERVER; }
+SpanKind ServerSpan::GetSpanKind()
+{
+  return SpanKind::SERVER;
+}
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd

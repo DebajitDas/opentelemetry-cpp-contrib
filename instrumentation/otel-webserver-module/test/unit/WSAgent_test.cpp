@@ -13,60 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "AgentCore.h"
-#include "api/ApiUtils.h"
-#include "api/Payload.h"
 #include "api/WSAgent.h"
-#include "mocks/mock_RequestProcessingEngine.h"
-#include "mocks/mock_core.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <unordered_map>
+#include "AgentCore.h"
+#include "api/ApiUtils.h"
+#include "api/Payload.h"
+#include "mocks/mock_RequestProcessingEngine.h"
+#include "mocks/mock_core.h"
 
-class FakeWSAgent : public appd::core::WSAgent {
+class FakeWSAgent : public appd::core::WSAgent
+{
 public:
-  MockAgentCore *getMockAgentCore() {
-    return dynamic_cast<MockAgentCore *>(mAgentCore.get());
-  }
-  MockApiUtils *getMockApiUtils() {
-    return dynamic_cast<MockApiUtils *>(mApiUtils.get());
-  }
+  MockAgentCore *getMockAgentCore() { return dynamic_cast<MockAgentCore *>(mAgentCore.get()); }
+  MockApiUtils *getMockApiUtils() { return dynamic_cast<MockApiUtils *>(mApiUtils.get()); }
 
-  void initDependency() override {
-    if (mAgentCore.get() == nullptr) {
+  void initDependency() override
+  {
+    if (mAgentCore.get() == nullptr)
+    {
       mAgentCore.reset(new MockAgentCore());
     }
-    if (mApiUtils.get() == nullptr) {
+    if (mApiUtils.get() == nullptr)
+    {
       mApiUtils.reset(new MockApiUtils());
     }
   }
 
   void addUserTenant(const std::string &context,
-                     std::shared_ptr<appd::core::TenantConfig> tenantConfig) {
+                     std::shared_ptr<appd::core::TenantConfig> tenantConfig)
+  {
     mUserAddedTenant[context] = tenantConfig;
   }
 };
 
 using ::testing::Return;
 
-TEST(WSAgent, initialise_WSAgent_returns_success) {
+TEST(WSAgent, initialise_WSAgent_returns_success)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
   bool isInit = agent.isInitialised();
   EXPECT_EQ(isInit, false);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
-  env[1].name = "Key2";
+  env[1].name  = "Key2";
   env[1].value = "Value2";
 
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
@@ -74,12 +75,10 @@ TEST(WSAgent, initialise_WSAgent_returns_success) {
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
   EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
 
   res = agent.init(env, 2);
@@ -91,21 +90,21 @@ TEST(WSAgent, initialise_WSAgent_returns_success) {
   free(env);
 }
 
-TEST(WSAgent, initialise_WSAgent_returns_success_if_already_initialised) {
+TEST(WSAgent, initialise_WSAgent_returns_success_if_already_initialised)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
-  env[1].name = "Key2";
+  env[1].name  = "Key2";
   env[1].value = "Value2";
 
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
@@ -113,12 +112,10 @@ TEST(WSAgent, initialise_WSAgent_returns_success_if_already_initialised) {
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
   EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
 
   res = agent.init(env, 2);
@@ -136,21 +133,21 @@ TEST(WSAgent, initialise_WSAgent_returns_success_if_already_initialised) {
   free(env);
 }
 
-TEST(WSAgent, initialise_WSAgent_returns_fail_on_init_boilerplate_failure) {
+TEST(WSAgent, initialise_WSAgent_returns_fail_on_init_boilerplate_failure)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
-  env[1].name = "Key2";
+  env[1].name  = "Key2";
   env[1].value = "Value2";
 
   APPD_SDK_STATUS_CODE res = APPD_STATUS(fail);
@@ -158,8 +155,7 @@ TEST(WSAgent, initialise_WSAgent_returns_fail_on_init_boilerplate_failure) {
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
   res = agent.init(env, 2);
   EXPECT_EQ(res, APPD_STATUS(fail));
@@ -167,21 +163,21 @@ TEST(WSAgent, initialise_WSAgent_returns_fail_on_init_boilerplate_failure) {
   free(env);
 }
 
-TEST(WSAgent, initialise_WSAgent_returns_fail_on_agentcore_start_failure) {
+TEST(WSAgent, initialise_WSAgent_returns_fail_on_agentcore_start_failure)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
-  env[1].name = "Key2";
+  env[1].name  = "Key2";
   env[1].value = "Value2";
 
   APPD_SDK_STATUS_CODE res1 = APPD_SUCCESS;
@@ -190,11 +186,9 @@ TEST(WSAgent, initialise_WSAgent_returns_fail_on_agentcore_start_failure) {
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res2; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res2; }));
 
   APPD_SDK_STATUS_CODE res = agent.init(env, 2);
   EXPECT_EQ(res, APPD_STATUS(fail));
@@ -202,22 +196,21 @@ TEST(WSAgent, initialise_WSAgent_returns_fail_on_agentcore_start_failure) {
   free(env);
 }
 
-TEST(WSAgent,
-     initialise_WSAgent_returns_agent_failed_to_start_on_read_config_failure) {
+TEST(WSAgent, initialise_WSAgent_returns_agent_failed_to_start_on_read_config_failure)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(2, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
-  env[1].name = "Key2";
+  env[1].name  = "Key2";
   env[1].value = "Value2";
 
   APPD_SDK_STATUS_CODE res1 = APPD_SUCCESS;
@@ -225,11 +218,9 @@ TEST(WSAgent,
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
   EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(false));
 
   APPD_SDK_STATUS_CODE res = agent.init(env, 2);
@@ -271,31 +262,29 @@ initialise_WSAgent_returns_success_on_ReadFromEnvinronment_returns_success)
         EXPECT_EQ(res, APPD_STATUS(success));
 }*/
 
-TEST(WSAgent, start_request_executes_successfully) {
+TEST(WSAgent, start_request_executes_successfully)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
 
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
   EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
 
   res = agent.init(env, 1);
@@ -305,124 +294,112 @@ TEST(WSAgent, start_request_executes_successfully) {
   EXPECT_EQ(isInit, true);
 
   MockRequestProcessingEngine mockProcessor;
-  auto payload = std::unique_ptr<appd::core::RequestPayload>(
-      new appd::core::RequestPayload());
-
-  std::string contextName{"contextName"};
-  EXPECT_CALL(*agentCore, getRequestProcessor(contextName))
-      .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * {
-            return &mockProcessor;
-          }));
-
-  EXPECT_CALL(mockProcessor, startRequest(_, _, _))
-      .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
-
-  void *reqHandle = nullptr;
-  const char *wscontext = "contextName";
-  res = agent.startRequest(wscontext, payload.get(), &reqHandle);
-  EXPECT_EQ(res, APPD_SUCCESS);
-
-  free(env);
-}
-
-TEST(WSAgent, start_request_returns_fail) {
-  FakeWSAgent agent;
-  agent.initDependency();
-
-  MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
-  testing::Mock::AllowLeak(agentCore);
-  testing::Mock::AllowLeak(apiUtils);
-
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
-
-  APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
-
-  using testing::_;
-  using ::testing::InvokeWithoutArgs;
-  EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
-
-  EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
-  EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
-
-  res = agent.init(env, 1);
-  EXPECT_EQ(res, APPD_SUCCESS);
-
-  bool isInit = agent.isInitialised();
-  EXPECT_EQ(isInit, true);
-
-  MockRequestProcessingEngine mockProcessor;
-  auto payload = std::unique_ptr<appd::core::RequestPayload>(
-      new appd::core::RequestPayload());
+  auto payload = std::unique_ptr<appd::core::RequestPayload>(new appd::core::RequestPayload());
 
   std::string contextName{"contextName"};
   EXPECT_CALL(*agentCore, getRequestProcessor(contextName))
       .Times(1)
       .WillOnce(InvokeWithoutArgs(
-          [&]() -> appd::core::IRequestProcessingEngine * { return nullptr; }));
+          [&]() -> appd::core::IRequestProcessingEngine * { return &mockProcessor; }));
 
-  void *reqHandle = nullptr;
-  const char *wscontext = "contextName";
-  res = agent.startRequest(wscontext, payload.get(), &reqHandle);
-  EXPECT_EQ(res, APPD_STATUS(fail));
-
-  std::string contextName1{"contextName1"};
-  EXPECT_CALL(*agentCore, getRequestProcessor(contextName1))
-      .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * {
-            return &mockProcessor;
-          }));
-
-  APPD_SDK_STATUS_CODE res1 = APPD_STATUS(fail);
   EXPECT_CALL(mockProcessor, startRequest(_, _, _))
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
-  const char *wscontext1 = "contextName1";
-  res = agent.startRequest(wscontext1, payload.get(), &reqHandle);
-  EXPECT_EQ(res, APPD_STATUS(fail));
+  void *reqHandle       = nullptr;
+  const char *wscontext = "contextName";
+  res                   = agent.startRequest(wscontext, payload.get(), &reqHandle);
+  EXPECT_EQ(res, APPD_SUCCESS);
 
   free(env);
 }
 
-TEST(WSAgent, end_request_returns_success) {
+TEST(WSAgent, start_request_returns_fail)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
 
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+  EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
+
+  res = agent.init(env, 1);
+  EXPECT_EQ(res, APPD_SUCCESS);
+
+  bool isInit = agent.isInitialised();
+  EXPECT_EQ(isInit, true);
+
+  MockRequestProcessingEngine mockProcessor;
+  auto payload = std::unique_ptr<appd::core::RequestPayload>(new appd::core::RequestPayload());
+
+  std::string contextName{"contextName"};
+  EXPECT_CALL(*agentCore, getRequestProcessor(contextName))
+      .Times(1)
       .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * { return nullptr; }));
+
+  void *reqHandle       = nullptr;
+  const char *wscontext = "contextName";
+  res                   = agent.startRequest(wscontext, payload.get(), &reqHandle);
+  EXPECT_EQ(res, APPD_STATUS(fail));
+
+  std::string contextName1{"contextName1"};
+  EXPECT_CALL(*agentCore, getRequestProcessor(contextName1))
+      .Times(1)
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::IRequestProcessingEngine * { return &mockProcessor; }));
+
+  APPD_SDK_STATUS_CODE res1 = APPD_STATUS(fail);
+  EXPECT_CALL(mockProcessor, startRequest(_, _, _))
+      .Times(1)
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
+
+  const char *wscontext1 = "contextName1";
+  res                    = agent.startRequest(wscontext1, payload.get(), &reqHandle);
+  EXPECT_EQ(res, APPD_STATUS(fail));
+
+  free(env);
+}
+
+TEST(WSAgent, end_request_returns_success)
+{
+  FakeWSAgent agent;
+  agent.initDependency();
+
+  MockAgentCore *agentCore = agent.getMockAgentCore();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
+  testing::Mock::AllowLeak(agentCore);
+  testing::Mock::AllowLeak(apiUtils);
+
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
+
+  APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
+
+  using testing::_;
+  using ::testing::InvokeWithoutArgs;
+  EXPECT_CALL(*apiUtils, init_boilerplate())
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+
+  EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
   EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
 
   res = agent.init(env, 1);
@@ -437,53 +414,48 @@ TEST(WSAgent, end_request_returns_success) {
   std::string contextName1{"contextName1"};
   EXPECT_CALL(*agentCore, getRequestProcessor(contextName1))
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * {
-            return &mockProcessor;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::IRequestProcessingEngine * { return &mockProcessor; }));
 
   APPD_SDK_STATUS_CODE res1 = APPD_SUCCESS;
   EXPECT_CALL(mockProcessor, endRequest(_, _))
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
 
   auto reqCtx = new appd::core::RequestContext();
   reqCtx->setContextName(contextName1);
-  reqHandle = static_cast<void *>(reqCtx);
+  reqHandle       = static_cast<void *>(reqCtx);
   const char *err = nullptr;
-  res = agent.endRequest(reqHandle, err);
+  res             = agent.endRequest(reqHandle, err);
   EXPECT_EQ(res, APPD_SUCCESS);
 
   free(env);
   delete reqCtx;
 }
 
-TEST(WSAgent, start_interaction_returns_success) {
+TEST(WSAgent, start_interaction_returns_success)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
 
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
   EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
 
   res = agent.init(env, 1);
@@ -498,16 +470,13 @@ TEST(WSAgent, start_interaction_returns_success) {
   std::string contextName1{"contextName1"};
   EXPECT_CALL(*agentCore, getRequestProcessor(contextName1))
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * {
-            return &mockProcessor;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::IRequestProcessingEngine * { return &mockProcessor; }));
 
   APPD_SDK_STATUS_CODE res1 = APPD_SUCCESS;
   EXPECT_CALL(mockProcessor, startInteractionImpl(_, _))
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
 
   appd::core::InteractionPayload *payload = nullptr;
   std::unordered_map<std::string, std::string> propagationHeaders;
@@ -523,94 +492,29 @@ TEST(WSAgent, start_interaction_returns_success) {
   delete reqCtx;
 }
 
-TEST(WSAgent, end_interaction_returns_success) {
+TEST(WSAgent, end_interaction_returns_success)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
 
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
-  EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
-
-  res = agent.init(env, 1);
-  EXPECT_EQ(res, APPD_SUCCESS);
-
-  bool isInit = agent.isInitialised();
-  EXPECT_EQ(isInit, true);
-
-  MockRequestProcessingEngine mockProcessor;
-
-  void *reqHandle = nullptr;
-  std::string contextName1{"contextName1"};
-  EXPECT_CALL(*agentCore, getRequestProcessor(contextName1))
-      .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * {
-            return &mockProcessor;
-          }));
-
-  APPD_SDK_STATUS_CODE res1 = APPD_SUCCESS;
-  EXPECT_CALL(mockProcessor, endInteraction(_, _, _))
-      .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
-
-  appd::core::EndInteractionPayload *payload = nullptr;
-
-  auto reqCtx = new appd::core::RequestContext();
-  reqCtx->setContextName(contextName1);
-  reqHandle = static_cast<void *>(reqCtx);
-
-  res = agent.endInteraction(reqHandle, true, payload);
-  EXPECT_EQ(res, APPD_SUCCESS);
-
-  free(env);
-  delete reqCtx;
-}
-
-TEST(WSAgent, end_interaction_returns_failure) {
-  FakeWSAgent agent;
-  agent.initDependency();
-
-  MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
-  testing::Mock::AllowLeak(agentCore);
-  testing::Mock::AllowLeak(apiUtils);
-
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
-
-  APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
-
-  using testing::_;
-  using ::testing::InvokeWithoutArgs;
-  EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
-
-  EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
   EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
 
   res = agent.init(env, 1);
@@ -626,10 +530,68 @@ TEST(WSAgent, end_interaction_returns_failure) {
   EXPECT_CALL(*agentCore, getRequestProcessor(contextName1))
       .Times(1)
       .WillOnce(InvokeWithoutArgs(
-          [&]() -> appd::core::IRequestProcessingEngine * { return nullptr; }));
+          [&]() -> appd::core::IRequestProcessingEngine * { return &mockProcessor; }));
+
+  APPD_SDK_STATUS_CODE res1 = APPD_SUCCESS;
+  EXPECT_CALL(mockProcessor, endInteraction(_, _, _))
+      .Times(1)
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res1; }));
 
   appd::core::EndInteractionPayload *payload = nullptr;
+
   auto reqCtx = new appd::core::RequestContext();
+  reqCtx->setContextName(contextName1);
+  reqHandle = static_cast<void *>(reqCtx);
+
+  res = agent.endInteraction(reqHandle, true, payload);
+  EXPECT_EQ(res, APPD_SUCCESS);
+
+  free(env);
+  delete reqCtx;
+}
+
+TEST(WSAgent, end_interaction_returns_failure)
+{
+  FakeWSAgent agent;
+  agent.initDependency();
+
+  MockAgentCore *agentCore = agent.getMockAgentCore();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
+  testing::Mock::AllowLeak(agentCore);
+  testing::Mock::AllowLeak(apiUtils);
+
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
+
+  APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
+
+  using testing::_;
+  using ::testing::InvokeWithoutArgs;
+  EXPECT_CALL(*apiUtils, init_boilerplate())
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+
+  EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+  EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
+
+  res = agent.init(env, 1);
+  EXPECT_EQ(res, APPD_SUCCESS);
+
+  bool isInit = agent.isInitialised();
+  EXPECT_EQ(isInit, true);
+
+  MockRequestProcessingEngine mockProcessor;
+
+  void *reqHandle = nullptr;
+  std::string contextName1{"contextName1"};
+  EXPECT_CALL(*agentCore, getRequestProcessor(contextName1))
+      .Times(1)
+      .WillOnce(
+          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * { return nullptr; }));
+
+  appd::core::EndInteractionPayload *payload = nullptr;
+  auto reqCtx                                = new appd::core::RequestContext();
   reqCtx->setContextName(contextName1);
   reqHandle = static_cast<void *>(reqCtx);
 
@@ -640,27 +602,25 @@ TEST(WSAgent, end_interaction_returns_failure) {
   std::string contextName2{"contextName2"};
   EXPECT_CALL(*agentCore, getRequestProcessor(contextName2))
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * {
-            return &mockProcessor;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::IRequestProcessingEngine * { return &mockProcessor; }));
 
   APPD_SDK_STATUS_CODE res2 = APPD_STATUS(fail);
   EXPECT_CALL(mockProcessor, endInteraction(_, _, _))
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res2; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res2; }));
 
   reqCtx = new appd::core::RequestContext();
   reqCtx->setContextName(contextName2);
   reqHandle = static_cast<void *>(reqCtx);
-  res = agent.endInteraction(reqHandle, true, payload);
+  res       = agent.endInteraction(reqHandle, true, payload);
   EXPECT_EQ(res, APPD_STATUS(fail));
 
   free(env);
 }
 
-TEST(WSAgent, add_wscontext_to_core_returns_failure_with_core_uninitialised) {
+TEST(WSAgent, add_wscontext_to_core_returns_failure_with_core_uninitialised)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
@@ -674,47 +634,46 @@ TEST(WSAgent, add_wscontext_to_core_returns_failure_with_core_uninitialised) {
   appd::core::WSContextConfig contextConfig;
 
   int res = agent.addWSContextToCore(contextName.c_str(),
-                                     &contextConfig); // contextName is NULL
+                                     &contextConfig);  // contextName is NULL
   EXPECT_EQ(res, -1);
 
   contextName = COREINIT_CONTEXT;
 
-  res = agent.addWSContextToCore(
-      contextName.c_str(), &contextConfig); // contextName is COREINIT_CONTEXT
+  res = agent.addWSContextToCore(contextName.c_str(),
+                                 &contextConfig);  // contextName is COREINIT_CONTEXT
   EXPECT_EQ(res, -1);
 
   contextName = "testContextName";
 
   res = agent.addWSContextToCore(contextName.c_str(),
-                                 nullptr); // contextConfig is NULL
+                                 nullptr);  // contextConfig is NULL
   EXPECT_EQ(res, -1);
 
-  contextConfig.serviceNamespace = "";
-  contextConfig.serviceName = "testName";
+  contextConfig.serviceNamespace  = "";
+  contextConfig.serviceName       = "testName";
   contextConfig.serviceInstanceId = "testId";
 
   res = agent.addWSContextToCore(contextName.c_str(),
-                                 &contextConfig); // serviceNamespace is NULL
+                                 &contextConfig);  // serviceNamespace is NULL
   EXPECT_EQ(res, -1);
 
   contextConfig.serviceNamespace = "testNamespace";
-  contextConfig.serviceName = "";
+  contextConfig.serviceName      = "";
 
   res = agent.addWSContextToCore(contextName.c_str(),
-                                 &contextConfig); // serviceName is NULL
+                                 &contextConfig);  // serviceName is NULL
   EXPECT_EQ(res, -1);
 
-  contextConfig.serviceName = "testName";
+  contextConfig.serviceName       = "testName";
   contextConfig.serviceInstanceId = "";
 
   res = agent.addWSContextToCore(contextName.c_str(),
-                                 &contextConfig); // serviceInstanceId is NULL
+                                 &contextConfig);  // serviceInstanceId is NULL
   EXPECT_EQ(res, -1);
 
   contextConfig.serviceInstanceId = "testId";
 
-  std::shared_ptr<appd::core::TenantConfig> tenant =
-      std::make_shared<appd::core::TenantConfig>();
+  std::shared_ptr<appd::core::TenantConfig> tenant = std::make_shared<appd::core::TenantConfig>();
   tenant->setServiceNamespace(contextConfig.serviceNamespace);
   tenant->setServiceName(contextConfig.serviceName);
   tenant->setServiceInstanceId(contextConfig.serviceInstanceId);
@@ -722,35 +681,33 @@ TEST(WSAgent, add_wscontext_to_core_returns_failure_with_core_uninitialised) {
   agent.addUserTenant(contextName, tenant);
 
   res = agent.addWSContextToCore(contextName.c_str(),
-                                 &contextConfig); // context already exists
+                                 &contextConfig);  // context already exists
   EXPECT_EQ(res, 0);
 }
 
-TEST(WSAgent, add_wscontext_to_core_returns_failure_with_core_initialised) {
+TEST(WSAgent, add_wscontext_to_core_returns_failure_with_core_initialised)
+{
   FakeWSAgent agent;
   agent.initDependency();
 
   MockAgentCore *agentCore = agent.getMockAgentCore();
-  MockApiUtils *apiUtils = agent.getMockApiUtils();
+  MockApiUtils *apiUtils   = agent.getMockApiUtils();
   testing::Mock::AllowLeak(agentCore);
   testing::Mock::AllowLeak(apiUtils);
 
-  APPD_SDK_ENV_RECORD *env =
-      (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
-  env[0].name = "Key1";
-  env[0].value = "Value1";
+  APPD_SDK_ENV_RECORD *env = (APPD_SDK_ENV_RECORD *)calloc(1, sizeof(APPD_SDK_ENV_RECORD));
+  env[0].name              = "Key1";
+  env[0].value             = "Value1";
 
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
 
   using testing::_;
   using ::testing::InvokeWithoutArgs;
   EXPECT_CALL(*apiUtils, init_boilerplate())
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
 
   EXPECT_CALL(*apiUtils, ReadFromPassedSettings(_, _, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> APPD_SDK_STATUS_CODE { return res; }));
   EXPECT_CALL(*agentCore, start(_, _, _)).Times(1).WillOnce(Return(true));
 
   res = agent.init(env, 1);
@@ -762,27 +719,22 @@ TEST(WSAgent, add_wscontext_to_core_returns_failure_with_core_initialised) {
   std::string contextName1 = "testContextName1";
   appd::core::WSContextConfig contextConfig;
 
-  contextConfig.serviceNamespace = "testNamespace";
-  contextConfig.serviceName = "testName";
+  contextConfig.serviceNamespace  = "testNamespace";
+  contextConfig.serviceName       = "testName";
   contextConfig.serviceInstanceId = "testId";
 
   std::shared_ptr<MockContext> mockContext = std::make_shared<MockContext>();
 
   EXPECT_CALL(*agentCore, getWebServerContext(contextName1))
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::IContext> {
-            return mockContext;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> std::shared_ptr<appd::core::IContext> { return mockContext; }));
 
-  std::shared_ptr<appd::core::TenantConfig> tenant =
-      std::make_shared<appd::core::TenantConfig>();
+  std::shared_ptr<appd::core::TenantConfig> tenant = std::make_shared<appd::core::TenantConfig>();
   EXPECT_CALL(*mockContext, getConfig())
       .Times(1)
       .WillOnce(
-          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::TenantConfig> {
-            return tenant;
-          }));
+          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::TenantConfig> { return tenant; }));
 
   int res2 = agent.addWSContextToCore(contextName1.c_str(), &contextConfig);
   EXPECT_EQ(res2, 0);
@@ -790,8 +742,8 @@ TEST(WSAgent, add_wscontext_to_core_returns_failure_with_core_initialised) {
   std::string contextName2 = "testContextName2";
   EXPECT_CALL(*agentCore, getWebServerContext(contextName2))
       .Times(1)
-      .WillOnce(InvokeWithoutArgs(
-          [&]() -> std::shared_ptr<appd::core::IContext> { return nullptr; }));
+      .WillOnce(
+          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::IContext> { return nullptr; }));
 
   EXPECT_CALL(*agentCore, addContext(contextName2, _)).Times(1);
 

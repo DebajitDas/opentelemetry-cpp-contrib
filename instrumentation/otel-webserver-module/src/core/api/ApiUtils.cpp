@@ -16,83 +16,96 @@
 
 // file header
 #include "api/ApiUtils.h"
-#include "AgentLogger.h"
-#include "api/AppdynamicsSdk.h"
 #include <api/TenantConfig.h>
 #include <boost/lexical_cast.hpp>
+#include "AgentLogger.h"
+#include "api/AppdynamicsSdk.h"
 #ifndef _WIN32
-#include <dlfcn.h>
+#  include <dlfcn.h>
 #endif
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
-AgentLogger ApiUtils::apiLogger = 0;
+AgentLogger ApiUtils::apiLogger     = 0;
 AgentLogger ApiUtils::apiUserLogger = 0;
 
-void ApiUtils::cleanup() {
-  apiLogger = 0;
+void ApiUtils::cleanup()
+{
+  apiLogger     = 0;
   apiUserLogger = 0;
 }
 
-APPD_SDK_STATUS_CODE ApiUtils::init_boilerplate() {
-  try {
+APPD_SDK_STATUS_CODE ApiUtils::init_boilerplate()
+{
+  try
+  {
     boost::filesystem::path logConfigPath;
 
     char *envLogConfigPath = getenv(APPD_SDK_ENV_LOG_CONFIG_PATH);
-    if (envLogConfigPath) {
+    if (envLogConfigPath)
+    {
       logConfigPath = envLogConfigPath;
-    } else {
+    }
+    else
+    {
       logConfigPath = getSDKInstallPath() / boost::filesystem::path("conf") /
                       boost::filesystem::path("appdynamics_sdk_log4cxx.xml");
     }
 
     boost::system::error_code ec;
     if (!boost::filesystem::exists(logConfigPath,
-                                   ec)) // no throw version of exists()
+                                   ec))  // no throw version of exists()
     {
-      std::cerr << (boost::format(
-                        "Error: %1%: Invalid logging config file: %2%") %
+      std::cerr << (boost::format("Error: %1%: Invalid logging config file: %2%") %
                     BOOST_CURRENT_FUNCTION % logConfigPath)
                 << std::endl;
       return APPD_STATUS(no_log_config);
     }
 
     bool res = initLogging(logConfigPath);
-    if (!res) {
+    if (!res)
+    {
       return APPD_STATUS(log_init_failed);
     }
 
     ApiUtils::apiLogger = getLogger(APPD_LOG_API_LOGGER);
-    if (!ApiUtils::apiLogger) {
+    if (!ApiUtils::apiLogger)
+    {
       return APPD_STATUS(log_init_failed);
     }
 
     LOG4CXX_INFO(ApiUtils::apiLogger,
-                 "API logger initialized using log configuration file: "
-                     << logConfigPath.string());
+                 "API logger initialized using log configuration file: " << logConfigPath.string());
 
     ApiUtils::apiUserLogger = getLogger(APPD_LOG_API_USER_LOGGER);
-    if (!ApiUtils::apiUserLogger) {
+    if (!ApiUtils::apiUserLogger)
+    {
       return APPD_STATUS(log_init_failed);
     }
-    LOG4CXX_INFO(ApiUtils::apiUserLogger,
-                 "API User logger initialized using log configuration file:"
-                     << logConfigPath.string());
+    LOG4CXX_INFO(
+        ApiUtils::apiUserLogger,
+        "API User logger initialized using log configuration file:" << logConfigPath.string());
 
     std::atexit(cleanup);
-  } catch (...) {
+  }
+  catch (...)
+  {
     return APPD_STATUS(fail);
   }
 
   return APPD_SUCCESS;
 }
 
-boost::filesystem::path ApiUtils::getSDKInstallPath() {
+boost::filesystem::path ApiUtils::getSDKInstallPath()
+{
 #ifdef _WIN32
   char path[FILENAME_MAX];
   HMODULE hm = NULL;
-  if (!(hm = GetModuleHandleA("opentelemetry_webserver_sdk"))) {
+  if (!(hm = GetModuleHandleA("opentelemetry_webserver_sdk")))
+  {
     int ret = GetLastError();
     // Logger not initialized it
     fprintf(stderr, "GetModuleHandle returned %d\n", ret);
@@ -106,17 +119,17 @@ boost::filesystem::path ApiUtils::getSDKInstallPath() {
   boost::filesystem::path SOpath(dl_info.dli_fname);
 #endif
 
-  if (!boost::filesystem::exists(SOpath)) {
-    std::cerr << (boost::format(
-                      "Error: %1%: Invalid shared library path: %2%") %
+  if (!boost::filesystem::exists(SOpath))
+  {
+    std::cerr << (boost::format("Error: %1%: Invalid shared library path: %2%") %
                   BOOST_CURRENT_FUNCTION % SOpath)
               << std::endl;
     return boost::filesystem::path();
   }
 
-  boost::filesystem::path installPath =
-      SOpath.parent_path().parent_path().parent_path();
-  if (!boost::filesystem::exists(installPath)) {
+  boost::filesystem::path installPath = SOpath.parent_path().parent_path().parent_path();
+  if (!boost::filesystem::exists(installPath))
+  {
     std::cerr << (boost::format("Error: %1%: Cannot get install path from "
                                 "shared library path: %2%") %
                   BOOST_CURRENT_FUNCTION % SOpath)
@@ -128,12 +141,15 @@ boost::filesystem::path ApiUtils::getSDKInstallPath() {
   return installPath;
 }
 
-APPD_SDK_STATUS_CODE ApiUtils::ReadFromPassedSettings(
-    APPD_SDK_ENV_RECORD *envIn, unsigned numberOfRecords,
-    TenantConfig &tenantConfig, SpanNamer &spanNamer) {
+APPD_SDK_STATUS_CODE ApiUtils::ReadFromPassedSettings(APPD_SDK_ENV_RECORD *envIn,
+                                                      unsigned numberOfRecords,
+                                                      TenantConfig &tenantConfig,
+                                                      SpanNamer &spanNamer)
+{
   PassedEnvinronmentReader env;
   APPD_SDK_STATUS_CODE res = env.Init(envIn, numberOfRecords);
-  if (APPD_ISFAIL(res)) {
+  if (APPD_ISFAIL(res))
+  {
     return res;
   }
 
@@ -148,8 +164,10 @@ tenantConfig)
 }*/
 
 APPD_SDK_STATUS_CODE
-ApiUtils::ReadSettingsFromReader(IEnvReader &reader, TenantConfig &tenantConfig,
-                                 SpanNamer &spanNamer) {
+ApiUtils::ReadSettingsFromReader(IEnvReader &reader,
+                                 TenantConfig &tenantConfig,
+                                 SpanNamer &spanNamer)
+{
   std::string serviceNamespace;
   std::string serviceName;
   std::string serviceInstanceId;
@@ -172,65 +190,56 @@ ApiUtils::ReadSettingsFromReader(IEnvReader &reader, TenantConfig &tenantConfig,
 
   APPD_SDK_STATUS_CODE status;
 
-  status = reader.ReadMandatory(std::string(APPD_SDK_ENV_SERVICE_NAMESPACE),
-                                serviceNamespace);
+  status = reader.ReadMandatory(std::string(APPD_SDK_ENV_SERVICE_NAMESPACE), serviceNamespace);
+  if (APPD_ISFAIL(status))
+    return status;
+
+  status = reader.ReadMandatory(std::string(APPD_SDK_ENV_SERVICE_NAME), serviceName);
+  if (APPD_ISFAIL(status))
+    return status;
+
+  status = reader.ReadMandatory(std::string(APPD_SDK_ENV_SERVICE_INSTANCE_ID), serviceInstanceId);
+  if (APPD_ISFAIL(status))
+    return status;
+
+  status = reader.ReadOptional(std::string(APPD_SDK_ENV_OTEL_EXPORTER_TYPE), otelExporterType);
   if (APPD_ISFAIL(status))
     return status;
 
   status =
-      reader.ReadMandatory(std::string(APPD_SDK_ENV_SERVICE_NAME), serviceName);
-  if (APPD_ISFAIL(status))
-    return status;
-
-  status = reader.ReadMandatory(std::string(APPD_SDK_ENV_SERVICE_INSTANCE_ID),
-                                serviceInstanceId);
-  if (APPD_ISFAIL(status))
-    return status;
-
-  status = reader.ReadOptional(std::string(APPD_SDK_ENV_OTEL_EXPORTER_TYPE),
-                               otelExporterType);
-  if (APPD_ISFAIL(status))
-    return status;
-
-  status = reader.ReadMandatory(
-      std::string(APPD_SDK_ENV_OTEL_EXPORTER_ENDPOINT), otelExporterEndpoint);
-  if (APPD_ISFAIL(status))
-    return status;
-
-  status = ReadOptionalFromReader(
-      reader, std::string(APPD_SDK_ENV_OTEL_SSL_ENABLED), otelSslEnabled);
-  if (APPD_ISFAIL(status))
-    return status;
-
-  status = reader.ReadOptional(
-      std::string(APPD_SDK_ENV_OTEL_SSL_CERTIFICATE_PATH), otelSslCertPath);
-  if (APPD_ISFAIL(status))
-    return status;
-
-  status = reader.ReadMandatory(std::string(APPD_SDK_ENV_OTEL_LIBRARY_NAME),
-                                otelLibraryName);
-  if (APPD_ISFAIL(status))
-    return status;
-
-  reader.ReadOptional(std::string(APPD_SDK_ENV_OTEL_PROCESSOR_TYPE),
-                      otelProcessorType);
-
-  reader.ReadOptional(std::string(APPD_SDK_ENV_OTEL_SAMPLER_TYPE),
-                      otelSamplerType);
-
-  status = ReadOptionalFromReader(
-      reader, std::string(APPD_SDK_ENV_MAX_QUEUE_SIZE), otelMaxQueueSize);
+      reader.ReadMandatory(std::string(APPD_SDK_ENV_OTEL_EXPORTER_ENDPOINT), otelExporterEndpoint);
   if (APPD_ISFAIL(status))
     return status;
 
   status =
-      ReadOptionalFromReader(reader, std::string(APPD_SDK_ENV_SCHEDULED_DELAY),
-                             otelScheduledDelayMillis);
+      ReadOptionalFromReader(reader, std::string(APPD_SDK_ENV_OTEL_SSL_ENABLED), otelSslEnabled);
   if (APPD_ISFAIL(status))
     return status;
 
-  status = ReadOptionalFromReader(reader,
-                                  std::string(APPD_SDK_ENV_EXPORT_BATCH_SIZE),
+  status =
+      reader.ReadOptional(std::string(APPD_SDK_ENV_OTEL_SSL_CERTIFICATE_PATH), otelSslCertPath);
+  if (APPD_ISFAIL(status))
+    return status;
+
+  status = reader.ReadMandatory(std::string(APPD_SDK_ENV_OTEL_LIBRARY_NAME), otelLibraryName);
+  if (APPD_ISFAIL(status))
+    return status;
+
+  reader.ReadOptional(std::string(APPD_SDK_ENV_OTEL_PROCESSOR_TYPE), otelProcessorType);
+
+  reader.ReadOptional(std::string(APPD_SDK_ENV_OTEL_SAMPLER_TYPE), otelSamplerType);
+
+  status =
+      ReadOptionalFromReader(reader, std::string(APPD_SDK_ENV_MAX_QUEUE_SIZE), otelMaxQueueSize);
+  if (APPD_ISFAIL(status))
+    return status;
+
+  status = ReadOptionalFromReader(reader, std::string(APPD_SDK_ENV_SCHEDULED_DELAY),
+                                  otelScheduledDelayMillis);
+  if (APPD_ISFAIL(status))
+    return status;
+
+  status = ReadOptionalFromReader(reader, std::string(APPD_SDK_ENV_EXPORT_BATCH_SIZE),
                                   otelMaxExportBatchSize);
   if (APPD_ISFAIL(status))
     return status;
@@ -241,8 +250,7 @@ ApiUtils::ReadSettingsFromReader(IEnvReader &reader, TenantConfig &tenantConfig,
 
   reader.ReadOptional(std::string(APPD_SDK_ENV_SEGMENT_TYPE), segmentType);
 
-  reader.ReadOptional(std::string(APPD_SDK_ENV_SEGMENT_PARAMETER),
-                      segmentParameter);
+  reader.ReadOptional(std::string(APPD_SDK_ENV_SEGMENT_PARAMETER), segmentParameter);
 
   tenantConfig.setServiceNamespace(serviceNamespace);
   tenantConfig.setServiceName(serviceName);
@@ -265,21 +273,24 @@ ApiUtils::ReadSettingsFromReader(IEnvReader &reader, TenantConfig &tenantConfig,
 }
 
 APPD_SDK_STATUS_CODE
-ApiUtils::ReadOptionalFromReader(IEnvReader &reader, const std::string &varName,
-                                 bool &result) {
+ApiUtils::ReadOptionalFromReader(IEnvReader &reader, const std::string &varName, bool &result)
+{
   std::string value;
   APPD_SDK_STATUS_CODE status = reader.ReadOptional(varName, value);
-  if (value.empty()) {
+  if (value.empty())
+  {
     return APPD_SUCCESS;
   }
 
-  try {
+  try
+  {
     result = boost::lexical_cast<bool>(value);
-  } catch (const boost::bad_lexical_cast &e) {
-    LOG4CXX_ERROR(ApiUtils::apiLogger,
-                  boost::format("Environment variable %1% specified in wrong "
-                                "format: failed to cast %2% to %3% type") %
-                      varName.c_str() % value % e.target_type().name());
+  }
+  catch (const boost::bad_lexical_cast &e)
+  {
+    LOG4CXX_ERROR(ApiUtils::apiLogger, boost::format("Environment variable %1% specified in wrong "
+                                                     "format: failed to cast %2% to %3% type") %
+                                           varName.c_str() % value % e.target_type().name());
 
     return APPD_STATUS(environment_variable_invalid_value);
   }
@@ -316,22 +327,27 @@ e.target_type().name());
 }*/
 
 APPD_SDK_STATUS_CODE
-ApiUtils::ReadOptionalFromReader(IEnvReader &reader, const std::string &varName,
-                                 unsigned int &result) {
+ApiUtils::ReadOptionalFromReader(IEnvReader &reader,
+                                 const std::string &varName,
+                                 unsigned int &result)
+{
   std::string value;
   APPD_SDK_STATUS_CODE status = reader.ReadOptional(varName, value);
 
-  if (value.empty()) {
+  if (value.empty())
+  {
     return APPD_SUCCESS;
   }
 
-  try {
+  try
+  {
     result = boost::lexical_cast<unsigned int>(value);
-  } catch (const boost::bad_lexical_cast &e) {
-    LOG4CXX_ERROR(ApiUtils::apiLogger,
-                  boost::format("Environment variable %1% specified in wrong "
-                                "format: failed to cast %2% to %3% type") %
-                      varName.c_str() % value % e.target_type().name());
+  }
+  catch (const boost::bad_lexical_cast &e)
+  {
+    LOG4CXX_ERROR(ApiUtils::apiLogger, boost::format("Environment variable %1% specified in wrong "
+                                                     "format: failed to cast %2% to %3% type") %
+                                           varName.c_str() % value % e.target_type().name());
 
     return APPD_STATUS(environment_variable_invalid_value);
   }
@@ -390,19 +406,23 @@ APPD_SDK_STATUS_CODE RealEnvinronmentReader::ReadOptional(
 }*/
 
 APPD_SDK_STATUS_CODE PassedEnvinronmentReader::Init(APPD_SDK_ENV_RECORD *envIn,
-                                                    unsigned numberOfRecords) {
-  if (!envIn) {
+                                                    unsigned numberOfRecords)
+{
+  if (!envIn)
+  {
     return APPD_STATUS(environment_records_are_invalid);
   }
 
   env.clear();
-  for (unsigned i = 0; i < numberOfRecords; i++) {
-    if (!envIn[i].name || (strlen(envIn[i].name) == 0)) {
+  for (unsigned i = 0; i < numberOfRecords; i++)
+  {
+    if (!envIn[i].name || (strlen(envIn[i].name) == 0))
+    {
       return APPD_STATUS(environment_record_name_is_not_specified_or_empty);
     }
     std::string sName = envIn[i].name;
 
-    if (!envIn[i].value) // we allow empty string for value
+    if (!envIn[i].value)  // we allow empty string for value
     {
       return APPD_STATUS(environment_record_value_is_not_specified);
     }
@@ -414,23 +434,23 @@ APPD_SDK_STATUS_CODE PassedEnvinronmentReader::Init(APPD_SDK_ENV_RECORD *envIn,
 }
 
 APPD_SDK_STATUS_CODE
-PassedEnvinronmentReader::ReadMandatory(const std::string &varName,
-                                        std::string &result) {
+PassedEnvinronmentReader::ReadMandatory(const std::string &varName, std::string &result)
+{
   result.clear();
 
   std::map<std::string, std::string>::iterator found = env.find(varName);
-  if (found == env.end()) {
+  if (found == env.end())
+  {
     LOG4CXX_ERROR(ApiUtils::apiLogger,
-                  boost::format("Environment variable %1% must be specified") %
-                      varName.c_str());
+                  boost::format("Environment variable %1% must be specified") % varName.c_str());
     return APPD_STATUS(unspecified_environment_variable);
   }
 
   std::string value = (*found).second;
-  if (value.empty()) {
+  if (value.empty())
+  {
     LOG4CXX_ERROR(ApiUtils::apiLogger,
-                  boost::format("Environment variable %1% must be non-empty") %
-                      varName.c_str());
+                  boost::format("Environment variable %1% must be non-empty") % varName.c_str());
     return APPD_STATUS(environment_variable_invalid_value);
   }
 
@@ -440,23 +460,23 @@ PassedEnvinronmentReader::ReadMandatory(const std::string &varName,
 }
 
 APPD_SDK_STATUS_CODE
-PassedEnvinronmentReader::ReadOptional(const std::string &varName,
-                                       std::string &result) {
+PassedEnvinronmentReader::ReadOptional(const std::string &varName, std::string &result)
+{
   result.clear();
 
   std::map<std::string, std::string>::iterator found = env.find(varName);
-  if (found == env.end()) {
+  if (found == env.end())
+  {
     LOG4CXX_TRACE(ApiUtils::apiLogger,
-                  boost::format("Environment variable %1% is not specified") %
-                      varName.c_str());
+                  boost::format("Environment variable %1% is not specified") % varName.c_str());
     return APPD_SUCCESS;
   }
 
   std::string value = (*found).second;
-  if (value.empty()) {
+  if (value.empty())
+  {
     LOG4CXX_TRACE(ApiUtils::apiLogger,
-                  boost::format("Environment variable %1% is non-empty") %
-                      varName.c_str());
+                  boost::format("Environment variable %1% is non-empty") % varName.c_str());
     return APPD_SUCCESS;
   }
 
@@ -465,5 +485,5 @@ PassedEnvinronmentReader::ReadOptional(const std::string &varName,
   return APPD_SUCCESS;
 }
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd

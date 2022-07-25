@@ -17,29 +17,32 @@
 #ifndef __SDKWRAPPER_H
 #define __SDKWRAPPER_H
 
+#include <memory>
 #include "AgentLogger.h"
 #include "sdkwrapper/ISdkHelperFactory.h"
 #include "sdkwrapper/ISdkWrapper.h"
-#include <memory>
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
-class SdkWrapper : public ISdkWrapper {
+class SdkWrapper : public ISdkWrapper
+{
 public:
   SdkWrapper();
 
   void Init(std::shared_ptr<TenantConfig> config) override;
 
-  std::shared_ptr<IScopedSpan>
-  CreateSpan(const std::string &name, const SpanKind &kind,
-             const OtelKeyValueMap &attributes,
-             const std::unordered_map<std::string, std::string> &carrier = {})
-      override;
+  std::shared_ptr<IScopedSpan> CreateSpan(
+      const std::string &name,
+      const SpanKind &kind,
+      const OtelKeyValueMap &attributes,
+      const std::unordered_map<std::string, std::string> &carrier = {}) override;
 
-  void PopulatePropagationHeaders(
-      std::unordered_map<std::string, std::string> &carrier) override;
+  void PopulatePropagationHeaders(std::unordered_map<std::string, std::string> &carrier) override;
 
 private:
   trace::SpanKind GetTraceSpanKind(const SpanKind &kind);
@@ -49,8 +52,8 @@ protected:
   AgentLogger mLogger;
 };
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd
 
 #endif

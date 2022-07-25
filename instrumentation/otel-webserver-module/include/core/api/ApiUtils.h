@@ -17,14 +17,16 @@
 #ifndef APIUTILS_H
 #define APIUTILS_H
 
-#include "AgentLogger.h"
 #include <api/AppdynamicsSdk.h>
 #include <api/Interface.h>
 #include <map>
 #include <string>
+#include "AgentLogger.h"
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
 class TenantConfig;
 
@@ -36,20 +38,20 @@ std::string& result); virtual APPD_SDK_STATUS_CODE ReadOptional(const
 std::string& varName, std::string& result);
 };*/
 
-class PassedEnvinronmentReader : public IEnvReader {
+class PassedEnvinronmentReader : public IEnvReader
+{
 public:
   APPD_SDK_STATUS_CODE Init(APPD_SDK_ENV_RECORD *env, unsigned numberOfRecords);
 
-  virtual APPD_SDK_STATUS_CODE ReadMandatory(const std::string &varName,
-                                             std::string &result);
-  virtual APPD_SDK_STATUS_CODE ReadOptional(const std::string &varName,
-                                            std::string &result);
+  virtual APPD_SDK_STATUS_CODE ReadMandatory(const std::string &varName, std::string &result);
+  virtual APPD_SDK_STATUS_CODE ReadOptional(const std::string &varName, std::string &result);
 
 private:
   std::map<std::string, std::string> env;
 };
 
-class ApiUtils : public IApiUtils {
+class ApiUtils : public IApiUtils
+{
 public:
   static AgentLogger apiLogger;
   static AgentLogger apiUserLogger;
@@ -60,7 +62,7 @@ public:
    *   TODO: Following functions will be implemented while doing agent init and
    * term
    */
-  APPD_SDK_STATUS_CODE init_boilerplate() override; // initializes agentLogging
+  APPD_SDK_STATUS_CODE init_boilerplate() override;  // initializes agentLogging
 
   APPD_SDK_STATUS_CODE ReadFromPassedSettings(APPD_SDK_ENV_RECORD *env,
                                               unsigned numberOfRecords,
@@ -83,7 +85,7 @@ protected:
                                               unsigned int &result) override;
 };
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd
 
 #endif /* APIUTILS_H */

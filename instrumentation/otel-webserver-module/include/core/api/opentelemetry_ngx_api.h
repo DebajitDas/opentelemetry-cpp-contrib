@@ -18,7 +18,7 @@
 #define OPENTELEMETRY_NGX_API_H
 
 #ifndef __cplusplus
-#include <stdbool.h>
+#  include <stdbool.h>
 #endif
 
 #ifdef __cplusplus
@@ -31,13 +31,15 @@ extern "C" {
 
 const char *httpHeaders[] = {"baggage", "traceparent", "tracestate"};
 
-typedef struct {
+typedef struct
+{
   char *name;
   char *value;
 } http_headers;
 
 /* Structure for the request payload */
-typedef struct {
+typedef struct
+{
   const char *uri;
   const char *protocol;
   const char *http_get_param;
@@ -46,14 +48,16 @@ typedef struct {
   http_headers *headers;
 } request_payload;
 
-typedef struct {
+typedef struct
+{
   const char *cName;
   const char *sNamespace;
   const char *sName;
   const char *sInstanceId;
 } contextInfo;
 
-struct cNode {
+struct cNode
+{
   contextInfo cInfo;
   struct cNode *next;
 };
@@ -65,19 +69,21 @@ APPD_SDK_STATUS_CODE opentelemetry_core_init(APPD_SDK_ENV_RECORD *env,
                                              struct cNode *rootCN);
 APPD_SDK_STATUS_CODE startRequest(const char *wscontext,
                                   request_payload *req_payload,
-                                  APPD_SDK_HANDLE_REQ *reqHandle, int count);
+                                  APPD_SDK_HANDLE_REQ *reqHandle,
+                                  int count);
 APPD_SDK_STATUS_CODE
 startModuleInteraction(APPD_SDK_HANDLE_REQ req_handle_key,
-                       const char *module_name, const char *stage,
+                       const char *module_name,
+                       const char *stage,
                        bool resolveBackends,
-                       APPD_SDK_ENV_RECORD *propagationHeaders, int *ix);
+                       APPD_SDK_ENV_RECORD *propagationHeaders,
+                       int *ix);
 APPD_SDK_STATUS_CODE stopModuleInteraction(APPD_SDK_HANDLE_REQ req_handle_key,
                                            const char *backendName,
                                            const char *backendType,
                                            unsigned int err_code,
                                            const char *msg);
-APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ req_handle_key,
-                                const char *errMsg);
+APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ req_handle_key, const char *errMsg);
 
 #ifdef __cplusplus
 }

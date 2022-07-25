@@ -26,21 +26,24 @@
  * Class that is used to log agent logs into Apache error logs,
  * based on the flag "m_traceAsErrorFromUser" set by user.
  */
-class ApacheTracing {
+class ApacheTracing
+{
 public:
-  static bool m_traceAsErrorFromUser; // trace config from user
+  static bool m_traceAsErrorFromUser;  // trace config from user
 
-  enum ApacheTraceStates { UNINITIALIZED, NOTRACE, TRACE_AS_ERROR };
+  enum ApacheTraceStates
+  {
+    UNINITIALIZED,
+    NOTRACE,
+    TRACE_AS_ERROR
+  };
 
-  static void writeTrace(server_rec *s, const char *funcName, const char *note,
-                         ...);
-  static void writeError(server_rec *s, const char *funcName, const char *note,
-                         ...);
+  static void writeTrace(server_rec *s, const char *funcName, const char *note, ...);
+  static void writeError(server_rec *s, const char *funcName, const char *note, ...);
   static void logStartupTrace(server_rec *s);
 
 private:
   static ApacheTraceStates m_state;
-  static std::vector<std::string>
-      m_startupTrace; // holds log message until traceLevel is set
+  static std::vector<std::string> m_startupTrace;  // holds log message until traceLevel is set
 };
 #endif

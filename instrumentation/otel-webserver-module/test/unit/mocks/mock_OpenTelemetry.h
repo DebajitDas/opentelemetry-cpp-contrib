@@ -30,54 +30,63 @@
 
 using namespace opentelemetry;
 
-class MockTracer : public opentelemetry::trace::Tracer {
+class MockTracer : public opentelemetry::trace::Tracer
+{
 public:
-  virtual nostd::shared_ptr<trace::Span>
-  StartSpan(nostd::string_view name, const common::KeyValueIterable &attributes,
-            const trace::SpanContextKeyValueIterable &links,
-            const trace::StartSpanOptions &options = {}) noexcept {
-    attributes.ForEachKeyValue(
-        [&](nostd::string_view key, common::AttributeValue value) noexcept {
-          VerifyKeyValueIterable(key, value);
-          return true;
-        });
+  virtual nostd::shared_ptr<trace::Span> StartSpan(
+      nostd::string_view name,
+      const common::KeyValueIterable &attributes,
+      const trace::SpanContextKeyValueIterable &links,
+      const trace::StartSpanOptions &options = {}) noexcept
+  {
+    attributes.ForEachKeyValue([&](nostd::string_view key, common::AttributeValue value) noexcept {
+      VerifyKeyValueIterable(key, value);
+      return true;
+    });
     return StartSpanInternal(name, options.kind);
   }
 
-  MOCK_METHOD(void, VerifyKeyValueIterable,
+  MOCK_METHOD(void,
+              VerifyKeyValueIterable,
               (nostd::string_view name, common::AttributeValue value));
 
-  MOCK_METHOD(nostd::shared_ptr<trace::Span>, StartSpanInternal,
+  MOCK_METHOD(nostd::shared_ptr<trace::Span>,
+              StartSpanInternal,
               (nostd::string_view name, trace::SpanKind kind));
 
   MOCK_METHOD(void, ForceFlushWithMicroseconds, (uint64_t timeout), (noexcept));
   MOCK_METHOD(void, CloseWithMicroseconds, (uint64_t timeout), (noexcept));
 };
 
-class MockSpan : public opentelemetry::trace::Span {
+class MockSpan : public opentelemetry::trace::Span
+{
 public:
   virtual void AddEvent(nostd::string_view name,
                         common::SystemTimestamp timestamp,
-                        const common::KeyValueIterable &attributes) noexcept {
+                        const common::KeyValueIterable &attributes) noexcept
+  {
     AddEvent(name, timestamp);
-    attributes.ForEachKeyValue(
-        [&](nostd::string_view key, common::AttributeValue value) noexcept {
-          VerifyKeyValueIterable(key, value);
-          return true;
-        });
+    attributes.ForEachKeyValue([&](nostd::string_view key, common::AttributeValue value) noexcept {
+      VerifyKeyValueIterable(key, value);
+      return true;
+    });
   }
 
-  MOCK_METHOD(void, VerifyKeyValueIterable,
+  MOCK_METHOD(void,
+              VerifyKeyValueIterable,
               (nostd::string_view name, common::AttributeValue value));
 
-  MOCK_METHOD(void, SetAttribute,
+  MOCK_METHOD(void,
+              SetAttribute,
               (nostd::string_view key, const common::AttributeValue &value),
               (noexcept));
   MOCK_METHOD(void, AddEvent, (nostd::string_view name), (noexcept));
-  MOCK_METHOD(void, AddEvent,
+  MOCK_METHOD(void,
+              AddEvent,
               (nostd::string_view name, common::SystemTimestamp timestamp),
               (noexcept));
-  MOCK_METHOD(void, SetStatus,
+  MOCK_METHOD(void,
+              SetStatus,
               (trace::StatusCode code, nostd::string_view description),
               (noexcept));
   MOCK_METHOD(void, UpdateName, (nostd::string_view name), (noexcept));
@@ -86,25 +95,26 @@ public:
   MOCK_METHOD(bool, IsRecording, (), (const, noexcept));
 };
 
-class MockPropagator : public context::propagation::TextMapPropagator {
+class MockPropagator : public context::propagation::TextMapPropagator
+{
 public:
-  virtual context::Context
-  Extract(const context::propagation::TextMapCarrier &carrier,
-          context::Context &context) noexcept override {
+  virtual context::Context Extract(const context::propagation::TextMapCarrier &carrier,
+                                   context::Context &context) noexcept override
+  {
     ExtractImpl(carrier);
     return context;
   }
 
   virtual void Inject(context::propagation::TextMapCarrier &carrier,
-                      const context::Context &context) noexcept override {
+                      const context::Context &context) noexcept override
+  {
     InjectImpl(carrier);
   }
 
-  MOCK_METHOD(void, ExtractImpl,
-              (const context::propagation::TextMapCarrier &carrier));
-  MOCK_METHOD(void, InjectImpl,
-              (context::propagation::TextMapCarrier & carrier));
-  MOCK_METHOD(bool, Fields,
+  MOCK_METHOD(void, ExtractImpl, (const context::propagation::TextMapCarrier &carrier));
+  MOCK_METHOD(void, InjectImpl, (context::propagation::TextMapCarrier & carrier));
+  MOCK_METHOD(bool,
+              Fields,
               (nostd::function_ref<bool(nostd::string_view)> callback),
               (const, noexcept, override));
 };

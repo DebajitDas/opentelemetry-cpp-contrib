@@ -17,24 +17,27 @@
 #ifndef __AGENTCORE_H
 #define __AGENTCORE_H
 
-#include "AgentLogger.h"
-#include "api/Interface.h"
-#include "api/RequestProcessingEngine.h"
-#include "api/TenantConfig.h"
 #include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include "AgentLogger.h"
+#include "api/Interface.h"
+#include "api/RequestProcessingEngine.h"
+#include "api/TenantConfig.h"
 
 // Contexts did not exist in the beginning. Users put in the
 // serviceNamespace/serviceName/serviceInstanceId
 //  in the init config structure.
 #define COREINIT_CONTEXT "APPD_COREINIT_CONTEXT"
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
-class AgentKernel : public IKernel {
+class AgentKernel : public IKernel
+{
 public:
   AgentKernel();
   ~AgentKernel() = default;
@@ -57,7 +60,8 @@ protected:
   // worker-threads
 };
 
-class WebServerContext : public IContext {
+class WebServerContext : public IContext
+{
 public:
   WebServerContext(std::shared_ptr<appd::core::TenantConfig> tenantConfig);
   ~WebServerContext() = default;
@@ -65,9 +69,7 @@ public:
   void initContext(std::shared_ptr<appd::core::SpanNamer> spanNamer) override;
 
   IKernel *getKernel() const override { return mAgentKernel.get(); }
-  std::shared_ptr<appd::core::TenantConfig> getConfig() override {
-    return mTenantConfig;
-  }
+  std::shared_ptr<appd::core::TenantConfig> getConfig() override { return mTenantConfig; }
 
 private:
   std::shared_ptr<appd::core::TenantConfig> mTenantConfig;
@@ -76,9 +78,10 @@ protected:
   std::unique_ptr<IKernel> mAgentKernel;
 };
 
-class AgentCore : public ICore {
+class AgentCore : public ICore
+{
 public:
-  AgentCore() = default;
+  AgentCore()  = default;
   ~AgentCore() = default;
 
   bool start(std::shared_ptr<appd::core::TenantConfig> initConfig,
@@ -104,11 +107,10 @@ protected:
   std::unordered_map<std::string, std::shared_ptr<IContext>> mWebServerContexts;
 
   // Added for testability / mocking
-  virtual void createContext(const std::string &contextName,
-                             std::shared_ptr<TenantConfig> config);
+  virtual void createContext(const std::string &contextName, std::shared_ptr<TenantConfig> config);
 };
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd
 
 #endif /* __AGENTCORE_H */

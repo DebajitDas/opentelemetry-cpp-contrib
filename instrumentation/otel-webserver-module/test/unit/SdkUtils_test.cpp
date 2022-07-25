@@ -16,27 +16,28 @@
 #include "sdkwrapper/SdkUtils.h"
 #include "gtest/gtest.h"
 
-TEST(Get, ReturnsExpectedValueWhenKeyFound) {
-  std::unordered_map<std::string, std::string> carrier{
-      {"TestKey", "TestValue"}};
+TEST(Get, ReturnsExpectedValueWhenKeyFound)
+{
+  std::unordered_map<std::string, std::string> carrier{{"TestKey", "TestValue"}};
   opentelemetry::nostd::string_view key = "TestKey";
   appd::core::sdkwrapper::OtelCarrier otelCarrier(carrier);
   auto value = otelCarrier.Get(key);
   EXPECT_EQ(value, "TestValue");
 }
 
-TEST(Get, ReturnsEmptyWhenKeyNotFound) {
-  std::unordered_map<std::string, std::string> carrier{
-      {"TestKey", "TestValue"}};
+TEST(Get, ReturnsEmptyWhenKeyNotFound)
+{
+  std::unordered_map<std::string, std::string> carrier{{"TestKey", "TestValue"}};
   opentelemetry::nostd::string_view key = "TestKey1";
   appd::core::sdkwrapper::OtelCarrier otelCarrier(carrier);
   auto value = otelCarrier.Get(key);
   EXPECT_EQ(value, "");
 }
 
-TEST(Set, InsertsExpectedKeyAndValue) {
+TEST(Set, InsertsExpectedKeyAndValue)
+{
   std::unordered_map<std::string, std::string> carrier;
-  opentelemetry::nostd::string_view key = "TestKey";
+  opentelemetry::nostd::string_view key   = "TestKey";
   opentelemetry::nostd::string_view value = "TestValue";
   appd::core::sdkwrapper::OtelCarrier otelCarrier;
   otelCarrier.Set(key, value);

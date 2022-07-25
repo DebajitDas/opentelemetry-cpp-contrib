@@ -16,14 +16,27 @@
 
 #pragma once
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
-enum class StatusCode { Ok, Error, Unset };
+enum class StatusCode
+{
+  Ok,
+  Error,
+  Unset
+};
 
-enum class SpanKind { INTERNAL, SERVER, CLIENT };
+enum class SpanKind
+{
+  INTERNAL,
+  SERVER,
+  CLIENT
+};
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd

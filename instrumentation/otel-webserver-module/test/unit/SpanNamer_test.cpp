@@ -1,10 +1,11 @@
-#include "SpanNamingUtils.h"
 #include "api/SpanNamer.h"
+#include "SpanNamingUtils.h"
 #include "gtest/gtest.h"
 
-TEST(SpanNamer, SpanNamerCreatedWithDefaultValues) {
+TEST(SpanNamer, SpanNamerCreatedWithDefaultValues)
+{
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
-  auto spanName = spanNamer->getSpanName("/one/two/three/index.html");
+  auto spanName  = spanNamer->getSpanName("/one/two/three/index.html");
   EXPECT_EQ(spanName, "/one/two");
 
   spanName = spanNamer->getSpanName("index.html");
@@ -17,7 +18,8 @@ TEST(SpanNamer, SpanNamerCreatedWithDefaultValues) {
   EXPECT_EQ(spanName, "");
 }
 
-TEST(SpanNamer, SpanNamerCreatedWithFirstNSegments) {
+TEST(SpanNamer, SpanNamerCreatedWithFirstNSegments)
+{
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
 
   spanNamer->setSegmentRules("First", "2");
@@ -41,7 +43,8 @@ TEST(SpanNamer, SpanNamerCreatedWithFirstNSegments) {
   EXPECT_EQ(spanName, "/one/two");
 }
 
-TEST(SpanNamer, SpanNamerCreatedWithLastNSegments) {
+TEST(SpanNamer, SpanNamerCreatedWithLastNSegments)
+{
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
 
   spanNamer->setSegmentRules("Last", "2");
@@ -69,7 +72,8 @@ TEST(SpanNamer, SpanNamerCreatedWithLastNSegments) {
   EXPECT_EQ(spanName, "index.html");
 }
 
-TEST(SpanNamer, SpanNamerCreatedWithCustomSegments) {
+TEST(SpanNamer, SpanNamerCreatedWithCustomSegments)
+{
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
 
   spanNamer->setSegmentRules("Custom", "2");

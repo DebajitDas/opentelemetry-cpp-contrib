@@ -14,80 +14,92 @@
  * limitations under the License.
  */
 #include "api/SpanNamer.h"
-#include "SpanNamingUtils.h"
-#include "api/ApiUtils.h"
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
+#include "SpanNamingUtils.h"
+#include "api/ApiUtils.h"
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
 const unsigned DefaultSegmentCount = 2;
 const std::string SegmentSeparator = "/";
 
-SpanNamer::SpanNamer()
-    : segmentType(SegmentType::FIRST), segmentCount(DefaultSegmentCount) {}
+SpanNamer::SpanNamer() : segmentType(SegmentType::FIRST), segmentCount(DefaultSegmentCount) {}
 
-void SpanNamer::setSegmentRules(const std::string &segmentType,
-                                const std::string &segmentParameter) {
+void SpanNamer::setSegmentRules(const std::string &segmentType, const std::string &segmentParameter)
+{
   setSegmentType(segmentType);
   validateAndSetSegmentParameter(segmentParameter);
 }
 
-std::string SpanNamer::getSpanName(const std::string &uri) {
+std::string SpanNamer::getSpanName(const std::string &uri)
+{
   std::string spanName;
-  switch (segmentType) {
-  case SegmentType::FIRST:
-    spanName = getFirstNSegments(uri, segmentCount);
-    break;
-  case SegmentType::LAST:
-    spanName = getLastNSegments(uri, segmentCount);
-    break;
-  case SegmentType::CUSTOM:
-    spanName =
-        transformNameWithURISegments(uri, uri, segmentValues, SegmentSeparator);
-    break;
+  switch (segmentType)
+  {
+    case SegmentType::FIRST:
+      spanName = getFirstNSegments(uri, segmentCount);
+      break;
+    case SegmentType::LAST:
+      spanName = getLastNSegments(uri, segmentCount);
+      break;
+    case SegmentType::CUSTOM:
+      spanName = transformNameWithURISegments(uri, uri, segmentValues, SegmentSeparator);
+      break;
   }
   return spanName;
 }
 
-void SpanNamer::setSegmentType(const std::string &type) {
+void SpanNamer::setSegmentType(const std::string &type)
+{
   std::string lcType = type;
   std::transform(lcType.begin(), lcType.end(), lcType.begin(), ::tolower);
 
-  if (lcType == "last") {
+  if (lcType == "last")
+  {
     segmentType = SegmentType::LAST;
-  } else if (lcType == "custom") {
+  }
+  else if (lcType == "custom")
+  {
     segmentType = SegmentType::CUSTOM;
-  } else {
+  }
+  else
+  {
     segmentType = SegmentType::FIRST;
   }
 }
 
-void SpanNamer::validateAndSetSegmentParameter(
-    const std::string &segmentParameter) {
+void SpanNamer::validateAndSetSegmentParameter(const std::string &segmentParameter)
+{
   bool isInvalidValue = false;
-  switch (segmentType) {
-  case SegmentType::FIRST:
-  case SegmentType::LAST:
-    try {
-      segmentCount = boost::lexical_cast<unsigned int>(segmentParameter);
-    } catch (const boost::bad_lexical_cast &e) {
-      /*LOG4CXX_ERROR(  ApiUtils::apiLogger,
-              boost::format("Invalid Value %1% specified for SegmentParameter:
-         Error") % segmentParameter % e.target_type().name());*/
-      // Setting to default values
-      segmentCount = DefaultSegmentCount;
-    }
-    // Zero is invalid value, set it to default 2.
-    segmentCount = segmentCount == 0 ? DefaultSegmentCount : segmentCount;
-    break;
-  case SegmentType::CUSTOM:
-    segmentValues = segmentParameter;
-    break;
+  switch (segmentType)
+  {
+    case SegmentType::FIRST:
+    case SegmentType::LAST:
+      try
+      {
+        segmentCount = boost::lexical_cast<unsigned int>(segmentParameter);
+      }
+      catch (const boost::bad_lexical_cast &e)
+      {
+        /*LOG4CXX_ERROR(  ApiUtils::apiLogger,
+                boost::format("Invalid Value %1% specified for SegmentParameter:
+           Error") % segmentParameter % e.target_type().name());*/
+        // Setting to default values
+        segmentCount = DefaultSegmentCount;
+      }
+      // Zero is invalid value, set it to default 2.
+      segmentCount = segmentCount == 0 ? DefaultSegmentCount : segmentCount;
+      break;
+    case SegmentType::CUSTOM:
+      segmentValues = segmentParameter;
+      break;
   }
 }
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd

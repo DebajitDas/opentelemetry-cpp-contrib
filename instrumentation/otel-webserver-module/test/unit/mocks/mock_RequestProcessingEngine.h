@@ -13,42 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <gmock/gmock.h>
 #include "api/Payload.h"
 #include "api/RequestProcessingEngine.h"
 #include "api/TenantConfig.h"
-#include <gmock/gmock.h>
 
-class MockRequestProcessingEngine
-    : public appd::core::IRequestProcessingEngine {
+class MockRequestProcessingEngine : public appd::core::IRequestProcessingEngine
+{
 public:
-  MOCK_METHOD(void, init,
+  MOCK_METHOD(void,
+              init,
               (std::shared_ptr<appd::core::TenantConfig> & config,
                std::shared_ptr<appd::core::SpanNamer> spanNamer),
               (override));
 
-  MOCK_METHOD(APPD_SDK_STATUS_CODE, startRequest,
+  MOCK_METHOD(APPD_SDK_STATUS_CODE,
+              startRequest,
               (const std::string &wscontext,
                appd::core::RequestPayload *payload,
                APPD_SDK_HANDLE_REQ *reqHandle),
               (override));
 
-  MOCK_METHOD(APPD_SDK_STATUS_CODE, endRequest,
-              (APPD_SDK_HANDLE_REQ reqHandle, const char *error), (override));
+  MOCK_METHOD(APPD_SDK_STATUS_CODE,
+              endRequest,
+              (APPD_SDK_HANDLE_REQ reqHandle, const char *error),
+              (override));
 
   APPD_SDK_STATUS_CODE
   startInteraction(APPD_SDK_HANDLE_REQ reqHandle,
                    const appd::core::InteractionPayload *payload,
-                   std::unordered_map<std::string, std::string>
-                       &propagationHeaders) override {
+                   std::unordered_map<std::string, std::string> &propagationHeaders) override
+  {
     return startInteractionImpl(reqHandle, payload);
   };
 
-  MOCK_METHOD(APPD_SDK_STATUS_CODE, startInteractionImpl,
-              (APPD_SDK_HANDLE_REQ reqHandle,
-               const appd::core::InteractionPayload *payload));
+  MOCK_METHOD(APPD_SDK_STATUS_CODE,
+              startInteractionImpl,
+              (APPD_SDK_HANDLE_REQ reqHandle, const appd::core::InteractionPayload *payload));
 
-  MOCK_METHOD(APPD_SDK_STATUS_CODE, endInteraction,
-              (APPD_SDK_HANDLE_REQ reqHandle, bool ignoreBackend,
+  MOCK_METHOD(APPD_SDK_STATUS_CODE,
+              endInteraction,
+              (APPD_SDK_HANDLE_REQ reqHandle,
+               bool ignoreBackend,
                appd::core::EndInteractionPayload *payload),
               (override));
 };

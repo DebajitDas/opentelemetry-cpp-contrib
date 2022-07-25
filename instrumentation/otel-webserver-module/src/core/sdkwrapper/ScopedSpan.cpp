@@ -16,52 +16,65 @@
 
 #include "sdkwrapper/ScopedSpan.h"
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
-ScopedSpan::ScopedSpan(const std::string &name, const trace::SpanKind &kind,
+ScopedSpan::ScopedSpan(const std::string &name,
+                       const trace::SpanKind &kind,
                        const OtelKeyValueMap &attributes,
                        ISdkHelperFactory *sdkHelperFactory,
                        const AgentLogger &logger)
-    : mLogger(logger) {
+    : mLogger(logger)
+{
   trace::StartSpanOptions options{};
   options.kind = kind;
-  mSpan = sdkHelperFactory->GetTracer()->StartSpan(name, attributes, options);
+  mSpan        = sdkHelperFactory->GetTracer()->StartSpan(name, attributes, options);
   mScope.reset(new trace::Scope(mSpan));
   mSpanKind = kind;
 }
 
-void ScopedSpan::End() { mSpan->End(); }
+void ScopedSpan::End()
+{
+  mSpan->End();
+}
 
-void ScopedSpan::AddEvent(
-    const std::string &name,
-    const std::chrono::system_clock::time_point &timePoint,
-    const OtelKeyValueMap &attributes) {
+void ScopedSpan::AddEvent(const std::string &name,
+                          const std::chrono::system_clock::time_point &timePoint,
+                          const OtelKeyValueMap &attributes)
+{
   opentelemetry::common::SystemTimestamp timestamp(timePoint);
   mSpan->AddEvent(name, timestamp, attributes);
 }
 
-void ScopedSpan::AddAttribute(const std::string &key,
-                              const common::AttributeValue &value) {
+void ScopedSpan::AddAttribute(const std::string &key, const common::AttributeValue &value)
+{
   mSpan->SetAttribute(key, value);
 }
 
-void ScopedSpan::SetStatus(const StatusCode status, const std::string &desc) {
+void ScopedSpan::SetStatus(const StatusCode status, const std::string &desc)
+{
   trace::StatusCode otelStatus = trace::StatusCode::kUnset;
-  switch (status) {
-  case StatusCode::Error: {
-    otelStatus = trace::StatusCode::kError;
-  } break;
-  case StatusCode::Ok: {
-    otelStatus = trace::StatusCode::kOk;
-  } break;
+  switch (status)
+  {
+    case StatusCode::Error: {
+      otelStatus = trace::StatusCode::kError;
+    }
+    break;
+    case StatusCode::Ok: {
+      otelStatus = trace::StatusCode::kOk;
+    }
+    break;
   }
 
   mSpan->SetStatus(otelStatus, desc);
 }
 
-SpanKind ScopedSpan::GetSpanKind() {
+SpanKind ScopedSpan::GetSpanKind()
+{
   if (mSpanKind == trace::SpanKind::kServer)
     return SpanKind::SERVER;
   else if (mSpanKind == trace::SpanKind::kClient)
@@ -70,6 +83,6 @@ SpanKind ScopedSpan::GetSpanKind() {
     return SpanKind::INTERNAL;
 }
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd

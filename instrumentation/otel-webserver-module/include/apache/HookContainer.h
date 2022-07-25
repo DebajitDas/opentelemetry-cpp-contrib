@@ -17,13 +17,14 @@
 #ifndef APPD_HOOKSCONTAINER_H
 #define APPD_HOOKSCONTAINER_H
 
-#include "httpd.h"
 #include <map>
 #include <string>
+#include "httpd.h"
 
 // store meta data for each apache hook. This also creates a moduleList (array
 // of char*) used for the hook successor and predecessor.
-class HookInfo {
+class HookInfo
+{
 public:
   HookInfo(const std::string &stage, const std::string &module, int i);
 
@@ -33,11 +34,13 @@ public:
   int order;
 };
 
-class HookContainer {
+class HookContainer
+{
 public:
   // The following are indentifiers into the hookContainer storage. This is
   // needed to store and retrieve the endpoint module name.
-  enum appd_endpoint_indexes {
+  enum appd_endpoint_indexes
+  {
     APPD_ENDPOINT_HEADER_PARSER1,
     APPD_ENDPOINT_HEADER_PARSER2,
     APPD_ENDPOINT_HEADER_PARSER3,
@@ -109,8 +112,10 @@ public:
   };
 
   static HookContainer &getInstance();
-  void addHook(appd_endpoint_indexes index, const std::string &stage,
-               const std::string &module, int order);
+  void addHook(appd_endpoint_indexes index,
+               const std::string &stage,
+               const std::string &module,
+               int order);
   const std::string &getStage(appd_endpoint_indexes index) const;
   const std::string &getModule(appd_endpoint_indexes index) const;
   const char *const *getModuleList(appd_endpoint_indexes index) const;

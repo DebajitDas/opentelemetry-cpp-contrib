@@ -18,12 +18,13 @@
 #ifndef APPD_APACHEHOOKS_H
 #define APPD_APACHEHOOKS_H
 
-#include "ExcludedModules.h"
-#include "HookContainer.h"
 #include <api/AppdynamicsSdk.h>
 #include <unordered_map>
+#include "ExcludedModules.h"
+#include "HookContainer.h"
 
-class ApacheHooks {
+class ApacheHooks
+{
 public:
   static std::string m_aggregatorCommDir;
   static bool m_reportAllStages;
@@ -55,34 +56,33 @@ private:
   //
   // ASSUMPTION: if a module returns DECLINED, it does not go out to another
   // tier.
-  static APPD_SDK_STATUS_CODE
-  appd_startInteraction(request_rec *r, HookContainer::appd_endpoint_indexes,
-                        bool isAlwaysRunStage = false,
-                        bool ignoreBackend = false);
+  static APPD_SDK_STATUS_CODE appd_startInteraction(request_rec *r,
+                                                    HookContainer::appd_endpoint_indexes,
+                                                    bool isAlwaysRunStage = false,
+                                                    bool ignoreBackend    = false);
 
   // Callback to stop an Interaction
   static void appd_stopInteraction(request_rec *r,
                                    bool isAlwaysRunStage = false,
-                                   bool ignoreBackend = false);
+                                   bool ignoreBackend    = false);
 
   static void appd_payload_decorator(
       request_rec *r,
       std::unordered_map<std::string, std::string> propagationHeaders);
   static bool appd_requestHasErrors(request_rec *r);
-  static apr_status_t appd_output_filter(ap_filter_t *f,
-                                         apr_bucket_brigade *pbb);
+  static apr_status_t appd_output_filter(ap_filter_t *f, apr_bucket_brigade *pbb);
 
   // These hooks are for stopping interaction after a module callback in hook
   // stages
   static int appd_hook_interaction_end(request_rec *r);
-  static int appd_hook_interaction_end_handler(
-      request_rec *r); // ignore backends in handler stage
+  static int appd_hook_interaction_end_handler(request_rec *r);  // ignore backends in handler stage
   static int appd_hook_interaction_end_quick_handler(request_rec *r, int i);
   static void appd_hook_interaction_end_insert_filter(request_rec *r);
   static int appd_hook_interaction_end_log_transaction(request_rec *r);
 };
 
-class ApacheHooksForStage {
+class ApacheHooksForStage
+{
 public:
   // For reference: Stages and their hook function prototypes, we can hook into
   // the modules for the following stages
@@ -115,13 +115,12 @@ public:
      different stages
   */
   typedef int (*processRequestHooks)(
-      request_rec *); // create_request, post_read_request, header_parser,
-                      // translate_name, map_to_storage, access_checker_ex,
-                      // access_checker, check_user_id, auth_checker,
-                      // type_checker, fixups, handler, log_transaction
-  typedef int (*quickHandlerHooks)(request_rec *, int); // quick_handler
-  typedef void (*filterHooks)(
-      request_rec *); // insert_filter, insert_error_filter
+      request_rec *);  // create_request, post_read_request, header_parser,
+                       // translate_name, map_to_storage, access_checker_ex,
+                       // access_checker, check_user_id, auth_checker,
+                       // type_checker, fixups, handler, log_transaction
+  typedef int (*quickHandlerHooks)(request_rec *, int);  // quick_handler
+  typedef void (*filterHooks)(request_rec *);            // insert_filter, insert_error_filter
 
   /*
       Hooks to occur before a module to start an interaction for a stage.
@@ -200,41 +199,33 @@ public:
   static int appd_hook_log_transaction5(request_rec *r);
 
   static const std::vector<processRequestHooks> appd_header_parser_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_header_parser_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_header_parser_indexes;
   static const std::vector<quickHandlerHooks> appd_quick_handler_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_quick_handler_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_quick_handler_indexes;
   static const std::vector<processRequestHooks> appd_access_checker_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_access_checker_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_access_checker_indexes;
   static const std::vector<processRequestHooks> appd_check_user_id_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_check_user_id_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_check_user_id_indexes;
   static const std::vector<processRequestHooks> appd_auth_checker_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_auth_checker_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_auth_checker_indexes;
   static const std::vector<processRequestHooks> appd_type_checker_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_type_checker_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_type_checker_indexes;
   static const std::vector<processRequestHooks> appd_fixups_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_fixups_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_fixups_indexes;
   static const std::vector<filterHooks> appd_insert_filter_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_insert_filter_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_insert_filter_indexes;
   static const std::vector<processRequestHooks> appd_handler_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_handler_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_handler_indexes;
   static const std::vector<processRequestHooks> appd_log_transaction_hooks;
-  static const std::vector<HookContainer::appd_endpoint_indexes>
-      appd_log_transaction_indexes;
+  static const std::vector<HookContainer::appd_endpoint_indexes> appd_log_transaction_indexes;
 
   template <typename T, typename S>
-  static void insertHooksForStage(
-      apr_pool_t *p, hook_get_t getModules, T setHook,
-      const std::vector<S> &beginHandlers,
-      const std::vector<HookContainer::appd_endpoint_indexes> &indexes,
-      S endHandler, const std::string &stage);
+  static void insertHooksForStage(apr_pool_t *p,
+                                  hook_get_t getModules,
+                                  T setHook,
+                                  const std::vector<S> &beginHandlers,
+                                  const std::vector<HookContainer::appd_endpoint_indexes> &indexes,
+                                  S endHandler,
+                                  const std::string &stage);
 };
 #endif

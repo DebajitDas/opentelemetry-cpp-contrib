@@ -21,10 +21,10 @@
 #include <stdarg.h>
 
 #ifdef strtoul
-#undef strtoul
+#  undef strtoul
 #endif
 
-#include <http_log.h> // ap_log_error and others
+#include <http_log.h>  // ap_log_error and others
 
 #include "ApacheTracing.h"
 
@@ -37,8 +37,8 @@ ApacheTracing::ApacheTraceStates ApacheTracing::m_state =
 bool ApacheTracing::m_traceAsErrorFromUser = false;
 std::vector<std::string> ApacheTracing::m_startupTrace;
 
-void ApacheTracing::writeTrace(server_rec *s, const char *funcName,
-                               const char *format, ...) {
+void ApacheTracing::writeTrace(server_rec *s, const char *funcName, const char *format, ...)
+{
   char note[8192];
   va_list args;
 
@@ -46,10 +46,12 @@ void ApacheTracing::writeTrace(server_rec *s, const char *funcName,
   vsnprintf(note, sizeof(note), format, args);
   va_end(args);
 
-  if (m_state == TRACE_AS_ERROR && s) {
-    ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "mod_appdynamics: %s: %s",
-                 funcName, note);
-  } else if (m_state == UNINITIALIZED) {
+  if (m_state == TRACE_AS_ERROR && s)
+  {
+    ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "mod_appdynamics: %s: %s", funcName, note);
+  }
+  else if (m_state == UNINITIALIZED)
+  {
     std::string trace(funcName);
     trace += ": ";
     trace += note;
@@ -57,8 +59,8 @@ void ApacheTracing::writeTrace(server_rec *s, const char *funcName,
   }
 }
 
-void ApacheTracing::writeError(server_rec *s, const char *funcName,
-                               const char *format, ...) {
+void ApacheTracing::writeError(server_rec *s, const char *funcName, const char *format, ...)
+{
   char note[8192];
   va_list args;
 
@@ -66,21 +68,25 @@ void ApacheTracing::writeError(server_rec *s, const char *funcName,
   vsnprintf(note, sizeof(note), format, args);
   va_end(args);
 
-  if (s && funcName) {
-    ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "mod_appdynamics: %s: %s",
-                 funcName, note);
+  if (s && funcName)
+  {
+    ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "mod_appdynamics: %s: %s", funcName, note);
   }
 }
 
 // Set the trace level and log the buffered startup trace into apache log
-void ApacheTracing::logStartupTrace(server_rec *s) {
-  if (m_traceAsErrorFromUser) {
+void ApacheTracing::logStartupTrace(server_rec *s)
+{
+  if (m_traceAsErrorFromUser)
+  {
     m_state = TRACE_AS_ERROR;
 
-    for (auto it = m_startupTrace.begin(); it != m_startupTrace.end(); it++) {
+    for (auto it = m_startupTrace.begin(); it != m_startupTrace.end(); it++)
+    {
       ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, it->c_str());
     }
-  } else // default to DEBUG
+  }
+  else  // default to DEBUG
   {
     m_state = NOTRACE;
   }

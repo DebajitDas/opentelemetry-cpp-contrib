@@ -17,65 +17,68 @@
 #ifndef REQUEST_PROCESSOR_ENGINE_H
 #define REQUEST_PROCESSOR_ENGINE_H
 
+#include <unordered_map>
 #include "AgentLogger.h"
 #include "RequestContext.h"
 #include "api/AppdynamicsSdk.h"
 #include "api/SpanNamer.h"
-#include <unordered_map>
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
 class TenantConfig;
 class RequestPayload;
 class InteractionPayload;
 class EndInteractionPayload;
 
-namespace sdkwrapper {
+namespace sdkwrapper
+{
 
 class ISdkWrapper;
 
-} // namespace sdkwrapper
+}  // namespace sdkwrapper
 
 // Interface for RequestProcessingEngine
-class IRequestProcessingEngine {
+class IRequestProcessingEngine
+{
 public:
   virtual ~IRequestProcessingEngine() {}
   virtual void init(std::shared_ptr<TenantConfig> &config,
-                    std::shared_ptr<SpanNamer> spanNamer) = 0;
+                    std::shared_ptr<SpanNamer> spanNamer)                                   = 0;
   virtual APPD_SDK_STATUS_CODE startRequest(const std::string &wscontext,
                                             RequestPayload *payload,
-                                            APPD_SDK_HANDLE_REQ *reqHandle) = 0;
-  virtual APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ reqHandle,
-                                          const char *error) = 0;
+                                            APPD_SDK_HANDLE_REQ *reqHandle)                 = 0;
+  virtual APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ reqHandle, const char *error) = 0;
   virtual APPD_SDK_STATUS_CODE startInteraction(
-      APPD_SDK_HANDLE_REQ reqHandle, const InteractionPayload *payload,
-      std::unordered_map<std::string, std::string> &propagationHeaders) = 0;
-  virtual APPD_SDK_STATUS_CODE
-  endInteraction(APPD_SDK_HANDLE_REQ reqHandle, bool ignoreBackend,
-                 EndInteractionPayload *payload) = 0;
+      APPD_SDK_HANDLE_REQ reqHandle,
+      const InteractionPayload *payload,
+      std::unordered_map<std::string, std::string> &propagationHeaders)       = 0;
+  virtual APPD_SDK_STATUS_CODE endInteraction(APPD_SDK_HANDLE_REQ reqHandle,
+                                              bool ignoreBackend,
+                                              EndInteractionPayload *payload) = 0;
 };
 
 // Tracks request flow in agent using sdkWrapper
-class RequestProcessingEngine : public IRequestProcessingEngine {
+class RequestProcessingEngine : public IRequestProcessingEngine
+{
 public:
   RequestProcessingEngine();
   ~RequestProcessingEngine() = default;
 
-  void init(std::shared_ptr<TenantConfig> &config,
-            std::shared_ptr<SpanNamer> spanNamer) override;
+  void init(std::shared_ptr<TenantConfig> &config, std::shared_ptr<SpanNamer> spanNamer) override;
   APPD_SDK_STATUS_CODE startRequest(const std::string &wscontext,
                                     RequestPayload *payload,
                                     APPD_SDK_HANDLE_REQ *reqHandle) override;
-  APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ reqHandle,
-                                  const char *error) override;
+  APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ reqHandle, const char *error) override;
   APPD_SDK_STATUS_CODE startInteraction(
-      APPD_SDK_HANDLE_REQ reqHandle, const InteractionPayload *payload,
-      std::unordered_map<std::string, std::string> &propagationHeaders)
-      override;
-  APPD_SDK_API APPD_SDK_STATUS_CODE
-  endInteraction(APPD_SDK_HANDLE_REQ reqHandle, bool ignoreBackend,
-                 EndInteractionPayload *payload) override;
+      APPD_SDK_HANDLE_REQ reqHandle,
+      const InteractionPayload *payload,
+      std::unordered_map<std::string, std::string> &propagationHeaders) override;
+  APPD_SDK_API APPD_SDK_STATUS_CODE endInteraction(APPD_SDK_HANDLE_REQ reqHandle,
+                                                   bool ignoreBackend,
+                                                   EndInteractionPayload *payload) override;
 
 protected:
   std::shared_ptr<appd::core::sdkwrapper::ISdkWrapper> m_sdkWrapper;
@@ -85,7 +88,7 @@ private:
   AgentLogger mLogger;
 };
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd
 
 #endif

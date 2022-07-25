@@ -15,23 +15,29 @@
  */
 
 #include "api/WSAgent.h"
+#include <sstream>
 #include "AgentCore.h"
 #include "RequestContext.h"
 #include "api/ApiUtils.h"
 #include "api/AppdynamicsSdk.h"
 #include "api/RequestProcessingEngine.h"
 #include "api/SpanNamer.h"
-#include <sstream>
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
-inline void apiFuncTraceError(const char *funcName, APPD_SDK_STATUS_CODE ret) {
+inline void apiFuncTraceError(const char *funcName, APPD_SDK_STATUS_CODE ret)
+{
   std::ostringstream errMsg;
   errMsg << "Error: " << funcName << ": Error Code: " << ret;
-  if (ApiUtils::apiUserLogger) {
+  if (ApiUtils::apiUserLogger)
+  {
     LOG4CXX_ERROR(ApiUtils::apiUserLogger, errMsg.str());
-  } else {
+  }
+  else
+  {
     std::cerr << errMsg.str() << std::endl;
   }
 }
@@ -39,15 +45,18 @@ inline void apiFuncTraceError(const char *funcName, APPD_SDK_STATUS_CODE ret) {
 WSAgent::WSAgent() : initPid(0) {}
 
 APPD_SDK_STATUS_CODE
-WSAgent::init(APPD_SDK_ENV_RECORD *env, unsigned numberOfRecords) {
+WSAgent::init(APPD_SDK_ENV_RECORD *env, unsigned numberOfRecords)
+{
   std::lock_guard<std::mutex> lock(initMutex);
   APPD_SDK_STATUS_CODE res = validateAndInitialise();
-  if (APPD_ISFAIL(res)) {
+  if (APPD_ISFAIL(res))
+  {
     return res;
   }
 
   res = mApiUtils->init_boilerplate();
-  if (APPD_ISFAIL(res)) {
+  if (APPD_ISFAIL(res))
+  {
     apiFuncTraceError(BOOST_CURRENT_FUNCTION, res);
     return (res);
   }
@@ -56,15 +65,16 @@ WSAgent::init(APPD_SDK_ENV_RECORD *env, unsigned numberOfRecords) {
   std::shared_ptr<TenantConfig> tenantConfig(std::make_shared<TenantConfig>());
   std::shared_ptr<SpanNamer> spanNamer(std::make_shared<SpanNamer>());
   res = readConfig(env, numberOfRecords, tenantConfig, spanNamer);
-  if (APPD_ISFAIL(res)) {
+  if (APPD_ISFAIL(res))
+  {
     apiFuncTraceError(BOOST_CURRENT_FUNCTION, res);
     return (res);
   }
 
   // Start the Agent Core.
-  if (!mAgentCore->start(tenantConfig, spanNamer, mUserAddedTenant)) {
-    apiFuncTraceError(BOOST_CURRENT_FUNCTION,
-                      APPD_STATUS(agent_failed_to_start));
+  if (!mAgentCore->start(tenantConfig, spanNamer, mUserAddedTenant))
+  {
+    apiFuncTraceError(BOOST_CURRENT_FUNCTION, APPD_STATUS(agent_failed_to_start));
     return (APPD_STATUS(agent_failed_to_start));
   }
 
@@ -74,18 +84,23 @@ WSAgent::init(APPD_SDK_ENV_RECORD *env, unsigned numberOfRecords) {
 }
 
 APPD_SDK_STATUS_CODE
-WSAgent::term() {
-  if (mAgentCore) {
+WSAgent::term()
+{
+  if (mAgentCore)
+  {
     mAgentCore->stop();
   }
 }
 
 APPD_SDK_STATUS_CODE
-WSAgent::startRequest(const char *wscontext, RequestPayload *requestPayload,
-                      APPD_SDK_HANDLE_REQ *reqHandle) {
+WSAgent::startRequest(const char *wscontext,
+                      RequestPayload *requestPayload,
+                      APPD_SDK_HANDLE_REQ *reqHandle)
+{
   std::string context{wscontext};
   auto *engine = mAgentCore->getRequestProcessor(context);
-  if (nullptr != engine) {
+  if (nullptr != engine)
+  {
     return engine->startRequest(context, requestPayload, reqHandle);
   }
 
@@ -93,78 +108,85 @@ WSAgent::startRequest(const char *wscontext, RequestPayload *requestPayload,
 }
 
 APPD_SDK_STATUS_CODE
-WSAgent::endRequest(APPD_SDK_HANDLE_REQ reqHandle, const char *error) {
+WSAgent::endRequest(APPD_SDK_HANDLE_REQ reqHandle, const char *error)
+{
   // TODO: How to get the context here?
   // one solution is get it from reqHandle.
   // RequestProcessor would put the context
   // in reqHandle during start Request phase.
   RequestContext *ctx = static_cast<RequestContext *>(reqHandle);
-  auto context = ctx->getContextName();
-  auto *engine = mAgentCore->getRequestProcessor(context);
-  if (nullptr != engine) {
+  auto context        = ctx->getContextName();
+  auto *engine        = mAgentCore->getRequestProcessor(context);
+  if (nullptr != engine)
+  {
     return engine->endRequest(reqHandle, error);
   }
   return APPD_STATUS(fail);
 }
 
 APPD_SDK_STATUS_CODE
-WSAgent::startInteraction(
-    APPD_SDK_HANDLE_REQ reqHandle, const InteractionPayload *payload,
-    std::unordered_map<std::string, std::string> &propagationHeaders) {
+WSAgent::startInteraction(APPD_SDK_HANDLE_REQ reqHandle,
+                          const InteractionPayload *payload,
+                          std::unordered_map<std::string, std::string> &propagationHeaders)
+{
   RequestContext *ctx = static_cast<RequestContext *>(reqHandle);
-  auto context = ctx->getContextName();
-  auto *engine = mAgentCore->getRequestProcessor(context);
-  if (nullptr != engine) {
+  auto context        = ctx->getContextName();
+  auto *engine        = mAgentCore->getRequestProcessor(context);
+  if (nullptr != engine)
+  {
     return engine->startInteraction(reqHandle, payload, propagationHeaders);
   }
   return APPD_STATUS(fail);
 }
 
 APPD_SDK_STATUS_CODE
-WSAgent::endInteraction(APPD_SDK_HANDLE_REQ reqHandle, bool ignoreBackend,
-                        EndInteractionPayload *payload) {
+WSAgent::endInteraction(APPD_SDK_HANDLE_REQ reqHandle,
+                        bool ignoreBackend,
+                        EndInteractionPayload *payload)
+{
   RequestContext *ctx = static_cast<RequestContext *>(reqHandle);
-  auto context = ctx->getContextName();
-  auto *engine = mAgentCore->getRequestProcessor(context);
-  if (nullptr != engine) {
+  auto context        = ctx->getContextName();
+  auto *engine        = mAgentCore->getRequestProcessor(context);
+  if (nullptr != engine)
+  {
     return engine->endInteraction(reqHandle, ignoreBackend, payload);
   }
   return APPD_STATUS(fail);
 }
 
-int WSAgent::addWSContextToCore(const char *wscontext,
-                                WSContextConfig *contextConfig) {
+int WSAgent::addWSContextToCore(const char *wscontext, WSContextConfig *contextConfig)
+{
   std::string contextName{wscontext};
-  if (contextName.empty() || contextName == COREINIT_CONTEXT) {
-    apiFuncTraceError("Invalid context name",
-                      APPD_STATUS(cannot_add_ws_context_to_core));
+  if (contextName.empty() || contextName == COREINIT_CONTEXT)
+  {
+    apiFuncTraceError("Invalid context name", APPD_STATUS(cannot_add_ws_context_to_core));
     return -1;
   }
 
-  if (!contextConfig) {
-    apiFuncTraceError("Invalid context config",
-                      APPD_STATUS(cannot_add_ws_context_to_core));
+  if (!contextConfig)
+  {
+    apiFuncTraceError("Invalid context config", APPD_STATUS(cannot_add_ws_context_to_core));
     return -1;
   }
-  std::string serviceNamespace = contextConfig->serviceNamespace;
-  std::string serviceName = contextConfig->serviceName;
+  std::string serviceNamespace  = contextConfig->serviceNamespace;
+  std::string serviceName       = contextConfig->serviceName;
   std::string serviceInstanceId = contextConfig->serviceInstanceId;
 
-  if (serviceNamespace.empty()) {
-    apiFuncTraceError("Invalid serviceNamespace",
-                      APPD_STATUS(cannot_add_ws_context_to_core));
+  if (serviceNamespace.empty())
+  {
+    apiFuncTraceError("Invalid serviceNamespace", APPD_STATUS(cannot_add_ws_context_to_core));
     return -1;
   }
 
-  if (serviceName.empty()) {
-    apiFuncTraceError("Invalid serviceName",
-                      APPD_STATUS(cannot_add_ws_context_to_core));
+  if (serviceName.empty())
+  {
+    apiFuncTraceError("Invalid serviceName", APPD_STATUS(cannot_add_ws_context_to_core));
     return -1;
   }
 
-  if (serviceInstanceId.empty()) {
-    apiFuncTraceError("Invalid serviceInstanceId",
-                      APPD_STATUS(cannot_add_ws_context_to_core));
+  if (serviceInstanceId.empty())
+  {
+    apiFuncTraceError("Invalid serviceInstanceId", APPD_STATUS(cannot_add_ws_context_to_core));
     return -1;
   }
 
@@ -177,34 +199,37 @@ int WSAgent::addWSContextToCore(const char *wscontext,
     // Call to isinitialised should also be protected,
     // as initpid is accessed.
     std::lock_guard<std::mutex> lock(initMutex);
-    if (isInitialised()) {
+    if (isInitialised())
+    {
       auto existingContext = mAgentCore->getWebServerContext(contextName);
-      if (existingContext) // context already exists
+      if (existingContext)  // context already exists
       {
-        if (!existingContext->getConfig()->isSameNamespaceNameId(*tenant)) {
+        if (!existingContext->getConfig()->isSameNamespaceNameId(*tenant))
+        {
           // New context has different service namepsace/name/id. Issue warning.
           // TODO: Need to initialize logging correctly for testing.
-          std::cerr << "Warning: Context " << contextName << " already exists."
-                    << std::endl;
+          std::cerr << "Warning: Context " << contextName << " already exists." << std::endl;
         }
 
         return 0;
       }
       mAgentCore->addContext(contextName, tenant);
 
-      std::cerr << "Added context: " << contextName
-                << " serviceNamespace: " << serviceNamespace
-                << " serviceName: " << serviceName
-                << " serviceInstanceId: " << serviceInstanceId << std::endl;
-    } else {
+      std::cerr << "Added context: " << contextName << " serviceNamespace: " << serviceNamespace
+                << " serviceName: " << serviceName << " serviceInstanceId: " << serviceInstanceId
+                << std::endl;
+    }
+    else
+    {
       auto it = mUserAddedTenant.find(contextName);
-      if (it != mUserAddedTenant.end()) // context already exists
+      if (it != mUserAddedTenant.end())  // context already exists
       {
-        if (!it->second->isSameNamespaceNameId(*tenant)) {
+        if (!it->second->isSameNamespaceNameId(*tenant))
+        {
           // New context has different service namespace/name/id. Issue warning.
           // Must use std::cerr because agent logging is not initialized yet
-          std::cerr << "Warning: " << BOOST_CURRENT_FUNCTION << ": Context "
-                    << contextName << " already exists." << std::endl;
+          std::cerr << "Warning: " << BOOST_CURRENT_FUNCTION << ": Context " << contextName
+                    << " already exists." << std::endl;
         }
 
         return 0;
@@ -216,41 +241,58 @@ int WSAgent::addWSContextToCore(const char *wscontext,
   return 0;
 }
 
-void WSAgent::initDependency() {
+void WSAgent::initDependency()
+{
   std::lock_guard<std::mutex> lock(initMutex);
-  if (mAgentCore.get() == nullptr) {
+  if (mAgentCore.get() == nullptr)
+  {
     mAgentCore.reset(new AgentCore());
   }
-  if (mApiUtils.get() == nullptr) {
+  if (mApiUtils.get() == nullptr)
+  {
     mApiUtils.reset(new ApiUtils());
   }
 }
 
 APPD_SDK_STATUS_CODE
-WSAgent::checkPID() {
-  if (!initPid) {
+WSAgent::checkPID()
+{
+  if (!initPid)
+  {
     return appd_sdk_status_uninitialized;
-  } else if (initPid != getpid()) {
+  }
+  else if (initPid != getpid())
+  {
     return appd_sdk_status_wrong_process_id;
-  } else {
+  }
+  else
+  {
     return appd_sdk_status_success;
   }
 }
 
-void WSAgent::initialisePid() { initPid = getpid(); }
+void WSAgent::initialisePid()
+{
+  initPid = getpid();
+}
 
 APPD_SDK_STATUS_CODE
-WSAgent::validateAndInitialise() {
+WSAgent::validateAndInitialise()
+{
   APPD_SDK_STATUS_CODE res = checkPID();
-  if (res == appd_sdk_status_uninitialized) {
+  if (res == appd_sdk_status_uninitialized)
+  {
     // this is expected and means it is a valid sdk_init call.
     res = appd_sdk_status_success;
-  } else if (res == appd_sdk_status_success) {
+  }
+  else if (res == appd_sdk_status_success)
+  {
     // this means sdk_init was already called
-    apiFuncTraceError(BOOST_CURRENT_FUNCTION,
-                      appd_sdk_status_already_initialized);
+    apiFuncTraceError(BOOST_CURRENT_FUNCTION, appd_sdk_status_already_initialized);
     return (appd_sdk_status_already_initialized);
-  } else if (APPD_ISFAIL(res)) {
+  }
+  else if (APPD_ISFAIL(res))
+  {
     apiFuncTraceError(BOOST_CURRENT_FUNCTION, res);
     return (res);
   }
@@ -259,9 +301,11 @@ WSAgent::validateAndInitialise() {
 }
 
 APPD_SDK_STATUS_CODE
-WSAgent::readConfig(APPD_SDK_ENV_RECORD *env, unsigned numberOfRecords,
+WSAgent::readConfig(APPD_SDK_ENV_RECORD *env,
+                    unsigned numberOfRecords,
                     std::shared_ptr<TenantConfig> tenantConfig,
-                    std::shared_ptr<SpanNamer> spanNamer) {
+                    std::shared_ptr<SpanNamer> spanNamer)
+{
   // Read all Config passed in env or from environment
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
   /*if(!env || numberOfRecords == 0)
@@ -270,16 +314,16 @@ WSAgent::readConfig(APPD_SDK_ENV_RECORD *env, unsigned numberOfRecords,
   }
   else*/
   {
-    res = mApiUtils->ReadFromPassedSettings(env, numberOfRecords, *tenantConfig,
-                                            *spanNamer);
+    res = mApiUtils->ReadFromPassedSettings(env, numberOfRecords, *tenantConfig, *spanNamer);
   }
   return res;
 }
 
-bool WSAgent::isInitialised() {
+bool WSAgent::isInitialised()
+{
   // TODO: Do we need to take lock here ?
   return initPid;
 }
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd

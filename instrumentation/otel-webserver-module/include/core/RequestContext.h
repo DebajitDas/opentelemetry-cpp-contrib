@@ -20,10 +20,13 @@
 #include <memory>
 #include <stack>
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
-namespace sdkwrapper {
+namespace sdkwrapper
+{
 
 class IScopedSpan;
 
@@ -34,39 +37,35 @@ class IScopedSpan;
     An instance of this class is created at the beginning of each
     call of a request and destroyed at the end of each call.
  */
-class RequestContext {
+class RequestContext
+{
 public:
   // TODO : this constructor is used only in testing. Revisit this later to
   // remove
   RequestContext() = default;
 
-  RequestContext(std::shared_ptr<sdkwrapper::IScopedSpan> rootSpan)
-      : m_rootSpan(rootSpan) {}
+  RequestContext(std::shared_ptr<sdkwrapper::IScopedSpan> rootSpan) : m_rootSpan(rootSpan) {}
 
   ~RequestContext() = default;
 
-  std::shared_ptr<sdkwrapper::IScopedSpan> rootSpan() const {
-    return m_rootSpan;
-  }
+  std::shared_ptr<sdkwrapper::IScopedSpan> rootSpan() const { return m_rootSpan; }
 
-  void addInteraction(std::shared_ptr<sdkwrapper::IScopedSpan> interaction) {
+  void addInteraction(std::shared_ptr<sdkwrapper::IScopedSpan> interaction)
+  {
     m_interactions.push(interaction);
   }
 
-  void removeInteraction() {
+  void removeInteraction()
+  {
     // Interactions are LIFO. So, we pop the last interaction.
     m_interactions.pop();
   }
 
   bool hasActiveInteraction() const { return !m_interactions.empty(); }
 
-  std::shared_ptr<sdkwrapper::IScopedSpan> lastActiveInteraction() {
-    return m_interactions.top();
-  }
+  std::shared_ptr<sdkwrapper::IScopedSpan> lastActiveInteraction() { return m_interactions.top(); }
 
-  void setContextName(const std::string &contextName) {
-    m_contextName = contextName;
-  }
+  void setContextName(const std::string &contextName) { m_contextName = contextName; }
 
   std::string getContextName() const { return m_contextName; }
 
@@ -80,7 +79,7 @@ private:
   std::stack<std::shared_ptr<sdkwrapper::IScopedSpan>> m_interactions;
 };
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd
 
 #endif

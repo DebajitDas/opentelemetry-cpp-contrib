@@ -17,23 +17,29 @@
 #ifndef __SCOPEDSPAN_H
 #define __SCOPEDSPAN_H
 
-#include "AgentLogger.h"
-#include "sdkwrapper/IScopedSpan.h"
-#include "sdkwrapper/ISdkHelperFactory.h"
 #include <opentelemetry/nostd/unique_ptr.h>
 #include <opentelemetry/trace/scope.h>
 #include <opentelemetry/trace/span.h>
 #include <opentelemetry/trace/tracer.h>
+#include "AgentLogger.h"
+#include "sdkwrapper/IScopedSpan.h"
+#include "sdkwrapper/ISdkHelperFactory.h"
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
-class ScopedSpan : public IScopedSpan {
+class ScopedSpan : public IScopedSpan
+{
 public:
-  ScopedSpan(const std::string &name, const trace::SpanKind &kind,
+  ScopedSpan(const std::string &name,
+             const trace::SpanKind &kind,
              const OtelKeyValueMap &attributes,
-             ISdkHelperFactory *sdkHelperFactory, const AgentLogger &logger);
+             ISdkHelperFactory *sdkHelperFactory,
+             const AgentLogger &logger);
 
   void End() override;
 
@@ -41,8 +47,7 @@ public:
                 const std::chrono::system_clock::time_point &time_point,
                 const OtelKeyValueMap &attributes) override;
 
-  void AddAttribute(const std::string &key,
-                    const SpanAttributeValue &value) override;
+  void AddAttribute(const std::string &key, const SpanAttributeValue &value) override;
 
   void SetStatus(const StatusCode status, const std::string &desc) override;
 
@@ -55,8 +60,8 @@ private:
   trace::SpanKind mSpanKind;
 };
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd
 
 #endif

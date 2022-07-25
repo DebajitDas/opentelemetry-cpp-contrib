@@ -16,40 +16,46 @@
 
 #include "AgentCore.h"
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
-AgentKernel::AgentKernel()
-    : mLogger(getLogger(std::string(LogContext::AGENT) + ".AgentKernel")) {}
+AgentKernel::AgentKernel() : mLogger(getLogger(std::string(LogContext::AGENT) + ".AgentKernel")) {}
 
 void AgentKernel::initKernel(std::shared_ptr<TenantConfig> config,
-                             std::shared_ptr<SpanNamer> spanNamer) {
+                             std::shared_ptr<SpanNamer> spanNamer)
+{
   mRequestProcessingEngine.reset(new RequestProcessingEngine());
   mRequestProcessingEngine->init(config, spanNamer);
 }
 
-IRequestProcessingEngine *AgentKernel::getRequestProcessingEngine() {
+IRequestProcessingEngine *AgentKernel::getRequestProcessingEngine()
+{
   return mRequestProcessingEngine.get();
 }
 
 WebServerContext::WebServerContext(std::shared_ptr<TenantConfig> tenantConfig)
-    : mTenantConfig(tenantConfig) {}
+    : mTenantConfig(tenantConfig)
+{}
 
-void WebServerContext::initContext(std::shared_ptr<SpanNamer> spanNamer) {
+void WebServerContext::initContext(std::shared_ptr<SpanNamer> spanNamer)
+{
   mAgentKernel.reset(new AgentKernel());
   mAgentKernel->initKernel(mTenantConfig, spanNamer);
 }
 
 bool AgentCore::start(std::shared_ptr<TenantConfig> initConfig,
                       std::shared_ptr<SpanNamer> spanNamer,
-                      userAddedTenantMap &userAddedTenant) {
+                      userAddedTenantMap &userAddedTenant)
+{
   mLogger = getLogger(std::string(LogContext::AGENT) + ".AgentCore");
-  if (!mLogger) {
+  if (!mLogger)
+  {
     logStartupError("Agent logging was not initialized");
     return false;
   }
-  LOG4CXX_DEBUG(mLogger,
-                "Starting AgentCore with initial Config " << *initConfig);
+  LOG4CXX_DEBUG(mLogger, "Starting AgentCore with initial Config " << *initConfig);
 
   mSpanNamer = spanNamer;
   createContext(COREINIT_CONTEXT, initConfig);
@@ -60,7 +66,8 @@ bool AgentCore::start(std::shared_ptr<TenantConfig> initConfig,
                 "AgentCore::WebServerContext map in key COREINIT_CONTEXT");
 
   // TODO: Stuff for fetching and adding all available contexts
-  for (auto it = userAddedTenant.begin(); it != userAddedTenant.end(); ++it) {
+  for (auto it = userAddedTenant.begin(); it != userAddedTenant.end(); ++it)
+  {
     addContext(it->first, it->second);
   }
 
@@ -68,30 +75,35 @@ bool AgentCore::start(std::shared_ptr<TenantConfig> initConfig,
   return true;
 }
 
-void TenantConfig::copyAllExceptNamespaceNameId(const TenantConfig &copyfrom) {
-  std::string oldServiceNamespace = serviceNamespace;
-  std::string oldServiceName = serviceName;
+void TenantConfig::copyAllExceptNamespaceNameId(const TenantConfig &copyfrom)
+{
+  std::string oldServiceNamespace  = serviceNamespace;
+  std::string oldServiceName       = serviceName;
   std::string oldServiceInstanceId = serviceInstanceId;
 
-  *this = copyfrom;
-  serviceNamespace = oldServiceNamespace;
-  serviceName = oldServiceName;
+  *this             = copyfrom;
+  serviceNamespace  = oldServiceNamespace;
+  serviceName       = oldServiceName;
   serviceInstanceId = oldServiceInstanceId;
 }
 
-void AgentCore::stop() {
+void AgentCore::stop()
+{
   LOG4CXX_INFO(mLogger, "AgentCore Stopped.");
   mLogger = nullptr;
 }
 
-std::shared_ptr<IContext> AgentCore::getWebServerContext(std::string &name) {
+std::shared_ptr<IContext> AgentCore::getWebServerContext(std::string &name)
+{
   // NULL or empty string are not valid context names. Use default context.
-  if (0 == name.length()) {
+  if (0 == name.length())
+  {
     name = COREINIT_CONTEXT;
   }
 
   auto it = mWebServerContexts.find(name);
-  if (it == mWebServerContexts.end()) {
+  if (it == mWebServerContexts.end())
+  {
     LOG4CXX_WARN(mLogger, "No Context found for " << name);
     return nullptr;
   }
@@ -100,11 +112,12 @@ std::shared_ptr<IContext> AgentCore::getWebServerContext(std::string &name) {
 }
 
 // This will add a new context or replace the existing one
-void AgentCore::addContext(const std::string &contextName,
-                           std::shared_ptr<TenantConfig> config) {
+void AgentCore::addContext(const std::string &contextName, std::shared_ptr<TenantConfig> config)
+{
   std::string initialContext{COREINIT_CONTEXT};
   std::shared_ptr<IContext> initialConfig = getWebServerContext(initialContext);
-  if (initialConfig) {
+  if (initialConfig)
+  {
     config->copyAllExceptNamespaceNameId(*((initialConfig.get())->getConfig()));
     createContext(contextName, config);
     mWebServerContexts[contextName]->initContext(mSpanNamer);
@@ -112,19 +125,21 @@ void AgentCore::addContext(const std::string &contextName,
   }
 }
 
-void AgentCore::createContext(const std::string &contextName,
-                              std::shared_ptr<TenantConfig> config) {
+void AgentCore::createContext(const std::string &contextName, std::shared_ptr<TenantConfig> config)
+{
   mWebServerContexts[contextName] = std::make_shared<WebServerContext>(config);
-  std::string logMsg = "Added context: " + contextName +
+  std::string logMsg              = "Added context: " + contextName +
                        " Service Namespace: " + config->getServiceNamespace() +
                        " Service Name: " + config->getServiceName() +
                        " Instance ID: " + (config->getServiceInstanceId());
   LOG4CXX_DEBUG(mLogger, logMsg);
 }
 
-IRequestProcessingEngine *AgentCore::getRequestProcessor(std::string &name) {
+IRequestProcessingEngine *AgentCore::getRequestProcessor(std::string &name)
+{
   auto wsContext = getWebServerContext(name);
-  if (!wsContext) {
+  if (!wsContext)
+  {
     LOG4CXX_WARN(mLogger, "No context found for [" << name << "]");
     return nullptr;
   }
@@ -132,5 +147,5 @@ IRequestProcessingEngine *AgentCore::getRequestProcessor(std::string &name) {
   return wsContext->getKernel()->getRequestProcessingEngine();
 }
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd

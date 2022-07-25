@@ -17,24 +17,29 @@
 #ifndef __ISDKWRAPPER_H
 #define __ISDKWRAPPER_H
 
+#include <memory>
+#include <unordered_map>
 #include "api/TenantConfig.h"
 #include "sdkwrapper/IScopedSpan.h"
 #include "sdkwrapper/SdkEnums.h"
-#include <memory>
-#include <unordered_map>
 
-namespace appd {
-namespace core {
-namespace sdkwrapper {
+namespace appd
+{
+namespace core
+{
+namespace sdkwrapper
+{
 
-class ISdkWrapper {
+class ISdkWrapper
+{
 public:
   virtual ~ISdkWrapper() = default;
 
   virtual void Init(std::shared_ptr<TenantConfig> config) = 0;
 
   virtual std::shared_ptr<IScopedSpan> CreateSpan(
-      const std::string &name, const SpanKind &kind,
+      const std::string &name,
+      const SpanKind &kind,
       const OtelKeyValueMap &attributes,
       const std::unordered_map<std::string, std::string> &carrier = {}) = 0;
 
@@ -42,8 +47,8 @@ public:
       std::unordered_map<std::string, std::string> &carrier) = 0;
 };
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd
 
 #endif

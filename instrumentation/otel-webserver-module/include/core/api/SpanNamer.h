@@ -17,20 +17,30 @@
 
 #include <string>
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
-enum class SegmentType { FIRST, LAST, CUSTOM };
+enum class SegmentType
+{
+  FIRST,
+  LAST,
+  CUSTOM
+};
 
-enum class SpanNamingRule { URLSEGMENT };
+enum class SpanNamingRule
+{
+  URLSEGMENT
+};
 
-class SpanNamer {
+class SpanNamer
+{
 public:
   SpanNamer();
   ~SpanNamer() = default;
 
-  void setSegmentRules(const std::string &segmentType,
-                       const std::string &segmentParameter);
+  void setSegmentRules(const std::string &segmentType, const std::string &segmentParameter);
   std::string getSpanName(const std::string &uri);
 
 private:
@@ -43,5 +53,5 @@ private:
   std::string segmentValues;
 };
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd

@@ -18,16 +18,19 @@
 #include <iostream>
 #include <string>
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
-class TenantConfig {
+class TenantConfig
+{
 public:
   TenantConfig() {}
 
-  bool isSameNamespaceNameId(const TenantConfig &cfg) {
-    return serviceNamespace == cfg.getServiceNamespace() &&
-           serviceName == cfg.getServiceName() &&
+  bool isSameNamespaceNameId(const TenantConfig &cfg)
+  {
+    return serviceNamespace == cfg.getServiceNamespace() && serviceName == cfg.getServiceName() &&
            serviceInstanceId == cfg.getServiceInstanceId();
   }
 
@@ -41,72 +44,64 @@ public:
   const std::string &getServiceName() const { return serviceName; }
   const std::string &getServiceInstanceId() const { return serviceInstanceId; }
   const std::string &getOtelLibraryName() const { return otelLibraryName; }
-  const std::string &getOtelLibraryVersion() const {
-    return otelLibraryVersion;
-  }
+  const std::string &getOtelLibraryVersion() const { return otelLibraryVersion; }
   const std::string &getOtelExporterType() const { return otelExporterType; }
-  const std::string &getOtelExporterEndpoint() const {
-    return otelExporterEndpoint;
-  }
+  const std::string &getOtelExporterEndpoint() const { return otelExporterEndpoint; }
   const std::string &getOtelProcessorType() const { return otelProcessorType; }
   const unsigned getOtelMaxQueueSize() const { return otelMaxQueueSize; }
-  const unsigned getOtelScheduledDelayMillis() const {
-    return otelScheduledDelayMillis;
-  }
-  const unsigned getOtelExportTimeoutMillis() const {
-    return otelExportTimeoutMillis;
-  }
-  const unsigned getOtelMaxExportBatchSize() const {
-    return otelMaxExportBatchSize;
-  }
+  const unsigned getOtelScheduledDelayMillis() const { return otelScheduledDelayMillis; }
+  const unsigned getOtelExportTimeoutMillis() const { return otelExportTimeoutMillis; }
+  const unsigned getOtelMaxExportBatchSize() const { return otelMaxExportBatchSize; }
   const std::string &getOtelSamplerType() const { return otelSamplerType; }
   const bool getOtelSslEnabled() const { return otelSslEnabled; }
   const std::string &getOtelSslCertPath() const { return otelSslCertPath; }
 
-  void setOtelLibraryName(const std::string &name) {
-    this->otelLibraryName = name;
-  }
-  void setOtelLibraryVersion(const std::string &version) {
-    this->otelLibraryVersion = version;
-  }
-  void setServiceNamespace(const std::string &serviceNamespace) {
+  void setOtelLibraryName(const std::string &name) { this->otelLibraryName = name; }
+  void setOtelLibraryVersion(const std::string &version) { this->otelLibraryVersion = version; }
+  void setServiceNamespace(const std::string &serviceNamespace)
+  {
     this->serviceNamespace = serviceNamespace;
   }
-  void setServiceName(const std::string &serviceName) {
-    this->serviceName = serviceName;
-  }
-  void setServiceInstanceId(const std::string &serviceInstanceId) {
+  void setServiceName(const std::string &serviceName) { this->serviceName = serviceName; }
+  void setServiceInstanceId(const std::string &serviceInstanceId)
+  {
     this->serviceInstanceId = serviceInstanceId;
   }
-  void setOtelExporterType(const std::string &otelExporterType) {
+  void setOtelExporterType(const std::string &otelExporterType)
+  {
     this->otelExporterType = otelExporterType;
   }
-  void setOtelExporterEndpoint(const std::string &otelExporterEndpoint) {
+  void setOtelExporterEndpoint(const std::string &otelExporterEndpoint)
+  {
     this->otelExporterEndpoint = otelExporterEndpoint;
   }
-  void setOtelProcessorType(const std::string &otelProcessorType) {
+  void setOtelProcessorType(const std::string &otelProcessorType)
+  {
     this->otelProcessorType = otelProcessorType;
   }
-  void setOtelMaxQueueSize(const unsigned int otelMaxQueueSize) {
+  void setOtelMaxQueueSize(const unsigned int otelMaxQueueSize)
+  {
     this->otelMaxQueueSize = otelMaxQueueSize;
   }
-  void
-  setOtelScheduledDelayMillis(const unsigned int otelScheduledDelayMillis) {
+  void setOtelScheduledDelayMillis(const unsigned int otelScheduledDelayMillis)
+  {
     this->otelScheduledDelayMillis = otelScheduledDelayMillis;
   }
-  void setOtelExportTimeoutMillis(const unsigned int otelExportTimeoutMillis) {
+  void setOtelExportTimeoutMillis(const unsigned int otelExportTimeoutMillis)
+  {
     this->otelExportTimeoutMillis = otelExportTimeoutMillis;
   }
-  void setOtelMaxExportBatchSize(const unsigned int otelMaxExportBatchSize) {
+  void setOtelMaxExportBatchSize(const unsigned int otelMaxExportBatchSize)
+  {
     this->otelMaxExportBatchSize = otelMaxExportBatchSize;
   }
-  void setOtelSamplerType(const std::string &otelSamplerType) {
+  void setOtelSamplerType(const std::string &otelSamplerType)
+  {
     this->otelSamplerType = otelSamplerType;
   }
-  void setOtelSslEnabled(const bool &otelSslEnabled) {
-    this->otelSslEnabled = otelSslEnabled;
-  }
-  void setOtelSslCertPath(const std::string &otelSslCertPath) {
+  void setOtelSslEnabled(const bool &otelSslEnabled) { this->otelSslEnabled = otelSslEnabled; }
+  void setOtelSslCertPath(const std::string &otelSslCertPath)
+  {
     this->otelSslCertPath = otelSslCertPath;
   }
 
@@ -137,23 +132,21 @@ private:
   //: have their default vaules
 };
 
-inline std::ostream &operator<<(std::ostream &os,
-                                const appd::core::TenantConfig &config) {
+inline std::ostream &operator<<(std::ostream &os, const appd::core::TenantConfig &config)
+{
   os << "\n ServiceNamespace:                " << config.getServiceNamespace()
      << "\n ServiceName:                     " << config.getServiceName()
      << "\n ServiceInstanceId                " << config.getServiceInstanceId()
      << "\n OtelLibraryName                  " << config.getOtelLibraryName()
      << "\n OtelLibraryVersion               " << config.getOtelLibraryVersion()
      << "\n OtelExporterType                 " << config.getOtelExporterType()
-     << "\n OtelExporterEndpoint             "
-     << config.getOtelExporterEndpoint()
+     << "\n OtelExporterEndpoint             " << config.getOtelExporterEndpoint()
      << "\n OtelProcessorType                " << config.getOtelProcessorType()
      << "\n OtelSamplerType                  " << config.getOtelSamplerType()
      << "\n OtelSslEnabled                   " << config.getOtelSslEnabled()
-     << "\n OtelSslCertPath                  " << config.getOtelSslCertPath()
-     << "";
+     << "\n OtelSslCertPath                  " << config.getOtelSslCertPath() << "";
   return os;
 }
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd

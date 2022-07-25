@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include "api/Payload.h"
 #include "api/RequestProcessingEngine.h"
 #include "api/TenantConfig.h"
 #include "mocks/mock_sdkwrapper.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 #include <unordered_map>
 
-std::shared_ptr<appd::core::TenantConfig> getConfig() {
-  auto config =
-      std::shared_ptr<appd::core::TenantConfig>(new appd::core::TenantConfig());
+std::shared_ptr<appd::core::TenantConfig> getConfig()
+{
+  auto config = std::shared_ptr<appd::core::TenantConfig>(new appd::core::TenantConfig());
   config->setServiceName("dummy_webserver");
   config->setServiceNamespace("dummy_service_namespace");
   config->setServiceInstanceId("dummy_instance_id");
@@ -34,10 +34,11 @@ std::shared_ptr<appd::core::TenantConfig> getConfig() {
   return config;
 }
 
-TEST(IntegrationTest, StartRequest) {
+TEST(IntegrationTest, StartRequest)
+{
   appd::core::RequestProcessingEngine engine;
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
-  auto config = getConfig();
+  auto config    = getConfig();
   engine.init(config, spanNamer);
   std::string wscontext = "ws_context";
   appd::core::RequestPayload payload;
@@ -51,15 +52,16 @@ TEST(IntegrationTest, StartRequest) {
   std::shared_ptr<appd::core::sdkwrapper::IScopedSpan> span;
   span.reset(new MockScopedSpan);
 
-  int *dummy = new int(2);
+  int *dummy      = new int(2);
   void *reqHandle = dummy;
   std::cout << "calling startReq" << std::endl;
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 20; i++)
+  {
     auto res = engine.startRequest("ws_context", &payload, &reqHandle);
     EXPECT_EQ(res, APPD_SUCCESS);
     appd::core::InteractionPayload iPayload;
     iPayload.moduleName = "module";
-    iPayload.phaseName = "phase";
+    iPayload.phaseName  = "phase";
 
     appd::core::sdkwrapper::OtelKeyValueMap keyValueMap;
     keyValueMap["interactionType"] = "EXIT_CALL";
@@ -68,7 +70,8 @@ TEST(IntegrationTest, StartRequest) {
     std::unordered_map<std::string, std::string> emptyHeaders;
     engine.startInteraction(reqHandle, &iPayload, propagationHeaders);
     std::cout << "printing propagation headers" << std::endl;
-    for (auto elem : propagationHeaders) {
+    for (auto elem : propagationHeaders)
+    {
       std::cout << elem.first << " " << elem.second << std::endl;
     }
     engine.endRequest(reqHandle, "error_msg");

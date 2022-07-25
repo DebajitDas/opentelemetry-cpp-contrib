@@ -17,28 +17,32 @@
 #ifndef APPD_WS_AGENT_H
 #define APPD_WS_AGENT_H
 
-#include "api/AppdynamicsSdk.h"
-#include "api/Interface.h"
-#include "api/Payload.h"
-#include "api/TenantConfig.h"
 #include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include "api/AppdynamicsSdk.h"
+#include "api/Interface.h"
+#include "api/Payload.h"
+#include "api/TenantConfig.h"
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
 /**
  * Configuration an webserver context (tenant) for the Core.
  */
-struct WSContextConfig {
+struct WSContextConfig
+{
   std::string serviceNamespace;
   std::string serviceName;
   std::string serviceInstanceId;
 };
 
-class WSAgent {
+class WSAgent
+{
 public:
   WSAgent();
   virtual ~WSAgent() = default;
@@ -55,11 +59,11 @@ public:
                                     RequestPayload *payload,
                                     APPD_SDK_HANDLE_REQ *reqHandle);
 
-  APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ reqHandle,
-                                  const char *error);
+  APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ reqHandle, const char *error);
 
   APPD_SDK_STATUS_CODE startInteraction(
-      APPD_SDK_HANDLE_REQ reqHandle, const InteractionPayload *payload,
+      APPD_SDK_HANDLE_REQ reqHandle,
+      const InteractionPayload *payload,
       std::unordered_map<std::string, std::string> &propagationHeaders);
 
   APPD_SDK_STATUS_CODE endInteraction(APPD_SDK_HANDLE_REQ reqHandle,
@@ -74,8 +78,7 @@ public:
    * @param contextConfig
    *     AppDynamics context configuration object
    */
-  APPD_SDK_API int addWSContextToCore(const char *wscontext,
-                                      WSContextConfig *contextConfig);
+  APPD_SDK_API int addWSContextToCore(const char *wscontext, WSContextConfig *contextConfig);
 
 private:
   unsigned long long initPid;
@@ -92,11 +95,10 @@ private:
 protected:
   std::unique_ptr<ICore> mAgentCore;
   std::unique_ptr<IApiUtils> mApiUtils;
-  std::unordered_map<std::string, std::shared_ptr<TenantConfig>>
-      mUserAddedTenant;
+  std::unordered_map<std::string, std::shared_ptr<TenantConfig>> mUserAddedTenant;
 };
 
-} // namespace core
-} // namespace appd
+}  // namespace core
+}  // namespace appd
 
 #endif

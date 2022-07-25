@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Dummy.h"
 #include <gmock/gmock.h>
+#include "Dummy.h"
 
-class MockMyAgentDep : public IAgentDep {
+class MockMyAgentDep : public IAgentDep
+{
 public:
   MOCK_METHOD(std::string, FirstWork, (int arg));
   MOCK_METHOD(bool, SecondWork, (const std::string &value));

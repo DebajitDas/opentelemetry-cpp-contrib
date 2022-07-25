@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 #include "api/opentelemetry_ngx_api.h"
+#include <cstring>
 #include "api/AppdynamicsSdk.h"
 #include "api/Payload.h"
 #include "api/WSAgent.h"
-#include <cstring>
 
-appd::core::WSAgent
-    wsAgent; // global variable for interface between Hooks and Core Logic
+appd::core::WSAgent wsAgent;  // global variable for interface between Hooks and Core Logic
 
-void populatePayload(request_payload *req_payload, void *load, int count) {
+void populatePayload(request_payload *req_payload, void *load, int count)
+{
   appd::core::RequestPayload *payload = (appd::core::RequestPayload *)load;
   payload->set_uri(req_payload->uri);
   payload->set_request_protocol(req_payload->protocol);
@@ -30,24 +30,29 @@ void populatePayload(request_payload *req_payload, void *load, int count) {
   payload->set_http_get_parameter(req_payload->http_get_param);
   payload->set_http_request_method(req_payload->request_method);
 
-  for (int i = 0; i < count; i++) {
-    payload->set_http_headers(req_payload->headers[i].name,
-                              req_payload->headers[i].value);
+  for (int i = 0; i < count; i++)
+  {
+    payload->set_http_headers(req_payload->headers[i].name, req_payload->headers[i].value);
   }
 }
 
-void initDependency() { wsAgent.initDependency(); }
+void initDependency()
+{
+  wsAgent.initDependency();
+}
 
 APPD_SDK_STATUS_CODE opentelemetry_core_init(APPD_SDK_ENV_RECORD *env,
                                              unsigned numberOfRecords,
-                                             struct cNode *rootCN) {
+                                             struct cNode *rootCN)
+{
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
-  struct cNode *curCN = rootCN;
+  struct cNode *curCN      = rootCN;
 
-  while (curCN) {
+  while (curCN)
+  {
     appd::core::WSContextConfig cfg;
-    cfg.serviceNamespace = (curCN->cInfo).sNamespace;
-    cfg.serviceName = (curCN->cInfo).sName;
+    cfg.serviceNamespace  = (curCN->cInfo).sNamespace;
+    cfg.serviceName       = (curCN->cInfo).sName;
     cfg.serviceInstanceId = (curCN->cInfo).sInstanceId;
     wsAgent.addWSContextToCore((curCN->cInfo).cName, &cfg);
     curCN = curCN->next;
@@ -60,30 +65,34 @@ APPD_SDK_STATUS_CODE opentelemetry_core_init(APPD_SDK_ENV_RECORD *env,
 
 APPD_SDK_STATUS_CODE startRequest(const char *wscontext,
                                   request_payload *req_payload,
-                                  APPD_SDK_HANDLE_REQ *reqHandle, int count) {
+                                  APPD_SDK_HANDLE_REQ *reqHandle,
+                                  int count)
+{
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
 
-  std::unique_ptr<appd::core::RequestPayload> requestPayload(
-      new appd::core::RequestPayload);
+  std::unique_ptr<appd::core::RequestPayload> requestPayload(new appd::core::RequestPayload);
   populatePayload(req_payload, requestPayload.get(), count);
   res = wsAgent.startRequest(wscontext, requestPayload.get(), reqHandle);
 
   return res;
 }
 
-APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ req_handle_key,
-                                const char *errMsg) {
+APPD_SDK_STATUS_CODE endRequest(APPD_SDK_HANDLE_REQ req_handle_key, const char *errMsg)
+{
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
-  res = wsAgent.endRequest(req_handle_key, errMsg);
+  res                      = wsAgent.endRequest(req_handle_key, errMsg);
 
   return res;
 }
 
 APPD_SDK_STATUS_CODE
 startModuleInteraction(APPD_SDK_HANDLE_REQ req_handle_key,
-                       const char *module_name, const char *stage,
+                       const char *module_name,
+                       const char *stage,
                        bool resolveBackends,
-                       APPD_SDK_ENV_RECORD *propagationHeaders, int *ix) {
+                       APPD_SDK_ENV_RECORD *propagationHeaders,
+                       int *ix)
+{
   APPD_SDK_STATUS_CODE res = APPD_SUCCESS;
   std::unordered_map<std::string, std::string> pHeaders;
   std::string module(module_name);
@@ -93,13 +102,16 @@ startModuleInteraction(APPD_SDK_HANDLE_REQ req_handle_key,
       new appd::core::InteractionPayload(module, m_stage, resolveBackends));
   res = wsAgent.startInteraction(req_handle_key, payload.get(), pHeaders);
 
-  if (APPD_ISSUCCESS(res)) {
-    if (!pHeaders.empty()) {
-      for (auto itr = pHeaders.begin(); itr != pHeaders.end(); itr++) {
+  if (APPD_ISSUCCESS(res))
+  {
+    if (!pHeaders.empty())
+    {
+      for (auto itr = pHeaders.begin(); itr != pHeaders.end(); itr++)
+      {
         char *temp_key = (char *)malloc(itr->first.size() + 1);
         std::strcpy(temp_key, itr->first.c_str());
         propagationHeaders[*ix].name = temp_key;
-        char *temp_value = (char *)malloc(itr->second.size() + 1);
+        char *temp_value             = (char *)malloc(itr->second.size() + 1);
         std::strcpy(temp_value, itr->second.c_str());
         propagationHeaders[*ix].value = temp_value;
         ++(*ix);
@@ -113,12 +125,11 @@ APPD_SDK_STATUS_CODE stopModuleInteraction(APPD_SDK_HANDLE_REQ req_handle_key,
                                            const char *backendName,
                                            const char *backendType,
                                            unsigned int err_code,
-                                           const char *msg) {
+                                           const char *msg)
+{
   std::unique_ptr<appd::core::EndInteractionPayload> payload(
-      new appd::core::EndInteractionPayload(backendName, backendType, err_code,
-                                            msg));
-  APPD_SDK_STATUS_CODE res =
-      wsAgent.endInteraction(req_handle_key, false, payload.get());
+      new appd::core::EndInteractionPayload(backendName, backendType, err_code, msg));
+  APPD_SDK_STATUS_CODE res = wsAgent.endInteraction(req_handle_key, false, payload.get());
 
   return res;
 }

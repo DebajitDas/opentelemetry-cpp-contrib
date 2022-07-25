@@ -14,33 +14,41 @@
  * limitations under the License.
  */
 #include "AgentCore.h"
-#include "mocks/mock_RequestProcessingEngine.h"
-#include "mocks/mock_core.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
+#include "mocks/mock_RequestProcessingEngine.h"
+#include "mocks/mock_core.h"
 
-class FakeContext : public appd::core::WebServerContext {
+class FakeContext : public appd::core::WebServerContext
+{
 public:
   FakeContext(std::shared_ptr<appd::core::TenantConfig> config)
-      : appd::core::WebServerContext(config) {}
-  void initContext(std::shared_ptr<appd::core::SpanNamer> spanNamer) {
+      : appd::core::WebServerContext(config)
+  {}
+  void initContext(std::shared_ptr<appd::core::SpanNamer> spanNamer)
+  {
     mAgentKernel.reset(new MockAgentKernel);
   }
 };
 
-class FakeAgentCore : public appd::core::AgentCore {
+class FakeAgentCore : public appd::core::AgentCore
+{
 public:
-  FakeAgentCore(std::shared_ptr<MockContext> initContext,
-                std::shared_ptr<MockContext> dummyContext)
-      : mInitContext(initContext), mDummyContext(dummyContext) {}
+  FakeAgentCore(std::shared_ptr<MockContext> initContext, std::shared_ptr<MockContext> dummyContext)
+      : mInitContext(initContext), mDummyContext(dummyContext)
+  {}
 
 protected:
   void createContext(const std::string &contextName,
-                     std::shared_ptr<appd::core::TenantConfig> config) {
-    if (contextName == COREINIT_CONTEXT) {
+                     std::shared_ptr<appd::core::TenantConfig> config)
+  {
+    if (contextName == COREINIT_CONTEXT)
+    {
       mWebServerContexts[contextName] = mInitContext;
-    } else if (contextName == "dummyConfig") {
+    }
+    else if (contextName == "dummyConfig")
+    {
       mWebServerContexts[contextName] = mDummyContext;
     }
   }
@@ -50,12 +58,14 @@ private:
   std::shared_ptr<MockContext> mDummyContext;
 };
 
-class FakeKernel : public appd::core::AgentKernel {
+class FakeKernel : public appd::core::AgentKernel
+{
 public:
   FakeKernel(MockRequestProcessingEngine *engine) : mEngine(engine) {}
 
   void initKernel(std::shared_ptr<appd::core::TenantConfig> config,
-                  std::shared_ptr<appd::core::SpanNamer> spanNamer) {
+                  std::shared_ptr<appd::core::SpanNamer> spanNamer)
+  {
     mRequestProcessingEngine.reset(mEngine);
   }
 
@@ -63,7 +73,8 @@ private:
   MockRequestProcessingEngine *mEngine;
 };
 
-void fillTenantConfig(std::shared_ptr<appd::core::TenantConfig> config) {
+void fillTenantConfig(std::shared_ptr<appd::core::TenantConfig> config)
+{
   config->setServiceNamespace("serviceNamespace");
   config->setServiceName("serviceName");
   config->setServiceInstanceId("serviceInstanceId");
@@ -80,7 +91,8 @@ using testing::_;
 using ::testing::InvokeWithoutArgs;
 using ::testing::Return;
 
-TEST(WebserverContext, webserver_context_creation_success) {
+TEST(WebserverContext, webserver_context_creation_success)
+{
   auto tenantConfig = std::make_shared<appd::core::TenantConfig>();
   fillTenantConfig(tenantConfig);
 
@@ -99,7 +111,8 @@ TEST(WebserverContext, webserver_context_creation_success) {
   EXPECT_EQ(config->getServiceNamespace(), tenantConfig->getServiceNamespace());
 }
 
-TEST(AgentCore, agent_core_start_returns_true) {
+TEST(AgentCore, agent_core_start_returns_true)
+{
   auto initConfig = std::make_shared<appd::core::TenantConfig>();
   fillTenantConfig(initConfig);
 
@@ -107,19 +120,16 @@ TEST(AgentCore, agent_core_start_returns_true) {
   fillTenantConfig(dummyConfig);
   dummyConfig->setServiceInstanceId("dummyInstanceId");
 
-  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>>
-      mapTenantConfig;
+  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>> mapTenantConfig;
   mapTenantConfig["dummyConfig"] = dummyConfig;
 
-  auto initContext = std::make_shared<MockContext>();
+  auto initContext  = std::make_shared<MockContext>();
   auto dummyContext = std::make_shared<MockContext>();
 
   EXPECT_CALL(*initContext, getConfig())
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::TenantConfig> {
-            return initConfig;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> std::shared_ptr<appd::core::TenantConfig> { return initConfig; }));
 
   EXPECT_CALL(*initContext, initContext(_)).Times(1);
   EXPECT_CALL(*dummyContext, initContext(_)).Times(1);
@@ -130,7 +140,8 @@ TEST(AgentCore, agent_core_start_returns_true) {
   EXPECT_EQ(ret, true);
 }
 
-TEST(AgentCore, get_request_processor_returns_valid_object) {
+TEST(AgentCore, get_request_processor_returns_valid_object)
+{
   auto initConfig = std::make_shared<appd::core::TenantConfig>();
   fillTenantConfig(initConfig);
 
@@ -138,19 +149,16 @@ TEST(AgentCore, get_request_processor_returns_valid_object) {
   fillTenantConfig(dummyConfig);
   dummyConfig->setServiceInstanceId("dummyInstanceId");
 
-  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>>
-      mapTenantConfig;
+  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>> mapTenantConfig;
   mapTenantConfig["dummyConfig"] = dummyConfig;
 
-  auto initContext = std::make_shared<MockContext>();
+  auto initContext  = std::make_shared<MockContext>();
   auto dummyContext = std::make_shared<MockContext>();
 
   EXPECT_CALL(*initContext, getConfig())
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::TenantConfig> {
-            return initConfig;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> std::shared_ptr<appd::core::TenantConfig> { return initConfig; }));
 
   EXPECT_CALL(*initContext, initContext(_)).Times(1);
   EXPECT_CALL(*dummyContext, initContext(_)).Times(1);
@@ -164,22 +172,20 @@ TEST(AgentCore, get_request_processor_returns_valid_object) {
   MockRequestProcessingEngine mockEngine;
   EXPECT_CALL(*dummyContext, getKernel())
       .Times(1)
-      .WillOnce(InvokeWithoutArgs(
-          [&]() -> appd::core::IKernel * { return &mockKernel; }));
+      .WillOnce(InvokeWithoutArgs([&]() -> appd::core::IKernel * { return &mockKernel; }));
 
   EXPECT_CALL(mockKernel, getRequestProcessingEngine())
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> appd::core::IRequestProcessingEngine * {
-            return &mockEngine;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> appd::core::IRequestProcessingEngine * { return &mockEngine; }));
 
   std::string contextName = "dummyConfig";
-  auto *engine = agentCore.getRequestProcessor(contextName);
+  auto *engine            = agentCore.getRequestProcessor(contextName);
   EXPECT_NE(engine, nullptr);
 }
 
-TEST(AgentCore, get_request_processor_returns_nullptr) {
+TEST(AgentCore, get_request_processor_returns_nullptr)
+{
   auto initConfig = std::make_shared<appd::core::TenantConfig>();
   fillTenantConfig(initConfig);
 
@@ -187,19 +193,16 @@ TEST(AgentCore, get_request_processor_returns_nullptr) {
   fillTenantConfig(dummyConfig);
   dummyConfig->setServiceInstanceId("dummyInstanceId");
 
-  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>>
-      mapTenantConfig;
+  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>> mapTenantConfig;
   mapTenantConfig["dummyConfig"] = dummyConfig;
 
-  auto initContext = std::make_shared<MockContext>();
+  auto initContext  = std::make_shared<MockContext>();
   auto dummyContext = std::make_shared<MockContext>();
 
   EXPECT_CALL(*initContext, getConfig())
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::TenantConfig> {
-            return initConfig;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> std::shared_ptr<appd::core::TenantConfig> { return initConfig; }));
 
   EXPECT_CALL(*initContext, initContext(_)).Times(1);
   EXPECT_CALL(*dummyContext, initContext(_)).Times(1);
@@ -210,11 +213,12 @@ TEST(AgentCore, get_request_processor_returns_nullptr) {
   EXPECT_EQ(ret, true);
 
   std::string contextName = "failConfig";
-  auto *engine = agentCore.getRequestProcessor(contextName);
+  auto *engine            = agentCore.getRequestProcessor(contextName);
   EXPECT_EQ(engine, nullptr);
 }
 
-TEST(AgentCore, get_webserver_context_returns_valid_object) {
+TEST(AgentCore, get_webserver_context_returns_valid_object)
+{
   auto initConfig = std::make_shared<appd::core::TenantConfig>();
   fillTenantConfig(initConfig);
 
@@ -222,19 +226,16 @@ TEST(AgentCore, get_webserver_context_returns_valid_object) {
   fillTenantConfig(dummyConfig);
   dummyConfig->setServiceInstanceId("dummyInstanceId");
 
-  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>>
-      mapTenantConfig;
+  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>> mapTenantConfig;
   mapTenantConfig["dummyConfig"] = dummyConfig;
 
-  auto initContext = std::make_shared<MockContext>();
+  auto initContext  = std::make_shared<MockContext>();
   auto dummyContext = std::make_shared<MockContext>();
 
   EXPECT_CALL(*initContext, getConfig())
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::TenantConfig> {
-            return initConfig;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> std::shared_ptr<appd::core::TenantConfig> { return initConfig; }));
 
   EXPECT_CALL(*initContext, initContext(_)).Times(1);
   EXPECT_CALL(*dummyContext, initContext(_)).Times(1);
@@ -245,17 +246,18 @@ TEST(AgentCore, get_webserver_context_returns_valid_object) {
   EXPECT_EQ(ret, true);
 
   std::string contextName = "dummyConfig";
-  auto context = agentCore.getWebServerContext(contextName);
+  auto context            = agentCore.getWebServerContext(contextName);
   EXPECT_NE(context.get(), nullptr);
   EXPECT_EQ(context, dummyContext);
 
   contextName = "";
-  context = agentCore.getWebServerContext(contextName);
+  context     = agentCore.getWebServerContext(contextName);
   EXPECT_NE(context.get(), nullptr);
   EXPECT_EQ(context, initContext);
 }
 
-TEST(AgentCore, get_webserver_context_returns_nullptr) {
+TEST(AgentCore, get_webserver_context_returns_nullptr)
+{
   auto initConfig = std::make_shared<appd::core::TenantConfig>();
   fillTenantConfig(initConfig);
 
@@ -263,19 +265,16 @@ TEST(AgentCore, get_webserver_context_returns_nullptr) {
   fillTenantConfig(dummyConfig);
   dummyConfig->setServiceInstanceId("dummyInstanceId");
 
-  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>>
-      mapTenantConfig;
+  std::unordered_map<std::string, std::shared_ptr<appd::core::TenantConfig>> mapTenantConfig;
   mapTenantConfig["dummyConfig"] = dummyConfig;
 
-  auto initContext = std::make_shared<MockContext>();
+  auto initContext  = std::make_shared<MockContext>();
   auto dummyContext = std::make_shared<MockContext>();
 
   EXPECT_CALL(*initContext, getConfig())
       .Times(1)
-      .WillOnce(
-          InvokeWithoutArgs([&]() -> std::shared_ptr<appd::core::TenantConfig> {
-            return initConfig;
-          }));
+      .WillOnce(InvokeWithoutArgs(
+          [&]() -> std::shared_ptr<appd::core::TenantConfig> { return initConfig; }));
 
   EXPECT_CALL(*initContext, initContext(_)).Times(1);
   EXPECT_CALL(*dummyContext, initContext(_)).Times(1);
@@ -286,11 +285,12 @@ TEST(AgentCore, get_webserver_context_returns_nullptr) {
   EXPECT_EQ(ret, true);
 
   std::string contextName = "failConfig";
-  auto context = agentCore.getWebServerContext(contextName);
+  auto context            = agentCore.getWebServerContext(contextName);
   EXPECT_EQ(context.get(), nullptr);
 }
 
-TEST(AgentKernel, agent_kernel_creation_success) {
+TEST(AgentKernel, agent_kernel_creation_success)
+{
   auto initConfig = std::make_shared<appd::core::TenantConfig>();
   fillTenantConfig(initConfig);
 
@@ -300,8 +300,8 @@ TEST(AgentKernel, agent_kernel_creation_success) {
   auto spanNamer = std::make_shared<appd::core::SpanNamer>();
   FakeKernel agentKernel(engine);
   agentKernel.initKernel(initConfig, spanNamer);
-  auto *rEngine = dynamic_cast<MockRequestProcessingEngine *>(
-      agentKernel.getRequestProcessingEngine());
+  auto *rEngine =
+      dynamic_cast<MockRequestProcessingEngine *>(agentKernel.getRequestProcessingEngine());
   EXPECT_NE(rEngine, nullptr);
   EXPECT_EQ(engine, rEngine);
 }

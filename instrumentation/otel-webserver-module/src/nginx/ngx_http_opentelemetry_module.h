@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "../../include/core/api/AppdynamicsSdk.h"
-#include "../../include/core/api/opentelemetry_ngx_api.h"
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include <stdbool.h>
+#include "../../include/core/api/AppdynamicsSdk.h"
+#include "../../include/core/api/opentelemetry_ngx_api.h"
 
 #define LOWEST_HTTP_ERROR_CODE 400
 
@@ -29,24 +29,25 @@
     Any new handler should be added before
     NGX_HTTP_MAX_HANDLE_COUNT
 */
-enum NGX_HTTP_INDEX {
-  NGX_HTTP_REALIP_MODULE_INDEX = 0,     // 0
-  NGX_HTTP_REWRITE_MODULE_INDEX,        // 1
-  NGX_HTTP_LIMIT_CONN_MODULE_INDEX,     // 2
-  NGX_HTTP_LIMIT_REQ_MODULE_INDEX,      // 3
-  NGX_HTTP_LIMIT_AUTH_REQ_MODULE_INDEX, // 4
-  NGX_HTTP_AUTH_BASIC_MODULE_INDEX,     // 5
-  NGX_HTTP_ACCESS_MODULE_INDEX,         // 6
-  NGX_HTTP_STATIC_MODULE_INDEX,         // 7
-  NGX_HTTP_GZIP_STATIC_MODULE_INDEX,    // 8
-  NGX_HTTP_DAV_MODULE_INDEX,            // 9
-  NGX_HTTP_AUTO_INDEX_MODULE_INDEX,     // 10
-  NGX_HTTP_INDEX_MODULE_INDEX,          // 11
-  NGX_HTTP_RANDOM_INDEX_MODULE_INDEX,   // 12
-  NGX_HTTP_LOG_MODULE_INDEX,            // 13
-  NGX_HTTP_TRY_FILES_MODULE_INDEX,      // 14
-  NGX_HTTP_MIRROR_MODULE_INDEX,         // 15
-  NGX_HTTP_MAX_HANDLE_COUNT             // 16
+enum NGX_HTTP_INDEX
+{
+  NGX_HTTP_REALIP_MODULE_INDEX = 0,      // 0
+  NGX_HTTP_REWRITE_MODULE_INDEX,         // 1
+  NGX_HTTP_LIMIT_CONN_MODULE_INDEX,      // 2
+  NGX_HTTP_LIMIT_REQ_MODULE_INDEX,       // 3
+  NGX_HTTP_LIMIT_AUTH_REQ_MODULE_INDEX,  // 4
+  NGX_HTTP_AUTH_BASIC_MODULE_INDEX,      // 5
+  NGX_HTTP_ACCESS_MODULE_INDEX,          // 6
+  NGX_HTTP_STATIC_MODULE_INDEX,          // 7
+  NGX_HTTP_GZIP_STATIC_MODULE_INDEX,     // 8
+  NGX_HTTP_DAV_MODULE_INDEX,             // 9
+  NGX_HTTP_AUTO_INDEX_MODULE_INDEX,      // 10
+  NGX_HTTP_INDEX_MODULE_INDEX,           // 11
+  NGX_HTTP_RANDOM_INDEX_MODULE_INDEX,    // 12
+  NGX_HTTP_LOG_MODULE_INDEX,             // 13
+  NGX_HTTP_TRY_FILES_MODULE_INDEX,       // 14
+  NGX_HTTP_MIRROR_MODULE_INDEX,          // 15
+  NGX_HTTP_MAX_HANDLE_COUNT              // 16
 } ngx_http_index;
 
 /*
@@ -59,7 +60,8 @@ mod_handler h[NGX_HTTP_MAX_HANDLE_COUNT];
  Structure for storing module details for mapping module handlers with their
  respective module
 */
-typedef struct {
+typedef struct
+{
   char *name;
   ngx_uint_t ngx_index;
   ngx_http_phases ph[2];
@@ -71,10 +73,10 @@ typedef struct {
 /*
         Configuration struct for module
 */
-typedef struct {
-  ngx_flag_t
-      nginxModuleEnabled; // OPTIONAL: ON or OFF to enable the OpenTelemetry
-                          // NGINX Agent or not respectively. (defaults to true)
+typedef struct
+{
+  ngx_flag_t nginxModuleEnabled;  // OPTIONAL: ON or OFF to enable the OpenTelemetry
+                                  // NGINX Agent or not respectively. (defaults to true)
   ngx_str_t nginxModuleOtelSpanExporter;
   ngx_str_t nginxModuleOtelExporterEndpoint;
   ngx_flag_t nginxModuleOtelSslEnabled;
@@ -106,23 +108,27 @@ typedef struct {
     Configuration structure for storing information throughout the worker
    process life-time
 */
-typedef struct {
+typedef struct
+{
   ngx_flag_t isInitialized;
   char *pid;
 } ngx_http_opentelemetry_worker_conf_t;
 
-typedef struct {
+typedef struct
+{
   const char *key;
   const char *value;
 } NGX_HTTP_OTEL_RECORDS;
 
-typedef struct {
+typedef struct
+{
   APPD_SDK_HANDLE_REQ otel_req_handle_key;
   APPD_SDK_ENV_RECORD *propagationHeaders;
   int pheaderCount;
 } ngx_http_otel_handles_t;
 
-typedef struct {
+typedef struct
+{
   ngx_str_t sNamespace;
   ngx_str_t sName;
   ngx_str_t sInstanceId;
@@ -133,30 +139,25 @@ typedef struct {
 
 /* Function prototypes */
 static void *ngx_http_opentelemetry_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_opentelemetry_merge_loc_conf(ngx_conf_t *cf, void *parent,
-                                                   void *child);
+static char *ngx_http_opentelemetry_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_http_opentelemetry_init(ngx_conf_t *cf);
 static ngx_int_t ngx_http_opentelemetry_init_worker(ngx_cycle_t *cycle);
 static void ngx_http_opentelemetry_exit_worker(ngx_cycle_t *cycle);
 static ngx_flag_t ngx_initialize_opentelemetry(ngx_http_request_t *r);
-static void fillRequestPayload(request_payload *req_payload,
-                               ngx_http_request_t *r, int *count);
+static void fillRequestPayload(request_payload *req_payload, ngx_http_request_t *r, int *count);
 static void startMonitoringRequest(ngx_http_request_t *r);
-static void stopMonitoringRequest(ngx_http_request_t *r,
-                                  APPD_SDK_HANDLE_REQ request_handle_key);
-static APPD_SDK_STATUS_CODE otel_startInteraction(ngx_http_request_t *r,
-                                                  const char *module_name);
-static void otel_stopInteraction(ngx_http_request_t *r, const char *module_name,
+static void stopMonitoringRequest(ngx_http_request_t *r, APPD_SDK_HANDLE_REQ request_handle_key);
+static APPD_SDK_STATUS_CODE otel_startInteraction(ngx_http_request_t *r, const char *module_name);
+static void otel_stopInteraction(ngx_http_request_t *r,
+                                 const char *module_name,
                                  APPD_SDK_HANDLE_REQ request_handle_key);
 static void otel_payload_decorator(ngx_http_request_t *r,
                                    APPD_SDK_ENV_RECORD *propagationHeaders,
                                    int count);
 static ngx_flag_t otel_requestHasErrors(ngx_http_request_t *r);
 static ngx_uint_t otel_getErrorCode(ngx_http_request_t *r);
-static char *ngx_otel_context_set(ngx_conf_t *cf, ngx_command_t *cmd,
-                                  void *conf);
-static void
-ngx_otel_set_global_context(ngx_http_opentelemetry_loc_conf_t *prev);
+static char *ngx_otel_context_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static void ngx_otel_set_global_context(ngx_http_opentelemetry_loc_conf_t *prev);
 
 /*
     Module specific handler
@@ -182,11 +183,9 @@ static ngx_int_t ngx_http_otel_mirror_handler(ngx_http_request_t *r);
     Utility fuction to check if the given module is monitored by Appd Agent
 */
 
-static void traceConfig(ngx_http_request_t *r,
-                        ngx_http_opentelemetry_loc_conf_t *conf);
+static void traceConfig(ngx_http_request_t *r, ngx_http_opentelemetry_loc_conf_t *conf);
 static ngx_int_t isOTelMonitored(const char *str);
-static char *computeContextName(ngx_http_request_t *r,
-                                ngx_http_opentelemetry_loc_conf_t *conf);
+static char *computeContextName(ngx_http_request_t *r, ngx_http_opentelemetry_loc_conf_t *conf);
 
 /* Filters */
 // static ngx_int_t ngx_http_opentelemetry_header_filter(ngx_http_request_t *r);

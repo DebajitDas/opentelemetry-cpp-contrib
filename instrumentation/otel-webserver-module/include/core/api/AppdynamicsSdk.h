@@ -20,33 +20,28 @@
 #include <stddef.h>
 
 #ifndef __cplusplus
-#include <stdbool.h>
+#  include <stdbool.h>
 #endif
 
 /* {{{ For API user: environment variables to specify Controller connectivity */
 #define APPD_SDK_ENV_OTEL_EXPORTER_TYPE "APPD_SDK_ENV_OTEL_EXPORTER_TYPE"
-#define APPD_SDK_ENV_OTEL_EXPORTER_ENDPOINT                                    \
-  "APPD_SDK_ENV_OTEL_EXPORTER_ENDPOINT" /*required*/
-#define APPD_SDK_ENV_OTEL_SSL_ENABLED                                          \
-  "APPD_SDK_ENV_OTEL_SSL_ENABLED" /*optional*/
-#define APPD_SDK_ENV_OTEL_SSL_CERTIFICATE_PATH                                 \
-  "APPD_SDK_ENV_OTEL_SSL_CERTIFICATE_PATH" /*optional*/
+#define APPD_SDK_ENV_OTEL_EXPORTER_ENDPOINT "APPD_SDK_ENV_OTEL_EXPORTER_ENDPOINT"       /*required*/
+#define APPD_SDK_ENV_OTEL_SSL_ENABLED "APPD_SDK_ENV_OTEL_SSL_ENABLED"                   /*optional*/
+#define APPD_SDK_ENV_OTEL_SSL_CERTIFICATE_PATH "APPD_SDK_ENV_OTEL_SSL_CERTIFICATE_PATH" /*optional*/
 #define APPD_SDK_ENV_OTEL_PROCESSOR_TYPE "APPD_SDK_ENV_OTEL_PROCESSOR_TYPE"
 #define APPD_SDK_ENV_OTEL_SAMPLER_TYPE "APPD_SDK_ENV_OTEL_SAMPLER_TYPE"
 #define APPD_SDK_ENV_OTEL_LIBRARY_NAME "APPD_SDK_ENV_OTEL_LIBRARY_NAME"
 /* {{{ For API user: optional, only if connection by aggregator is required */
 #define APPD_SDK_ENV_SERVICE_NAMESPACE "APPD_SDK_ENV_SERVICE_NAMESPACE"
-#define APPD_SDK_ENV_SERVICE_NAME "APPD_SDK_ENV_SERVICE_NAME" /*optional*/
-#define APPD_SDK_ENV_SERVICE_INSTANCE_ID                                       \
-  "APPD_SDK_ENV_SERVICE_INSTANCE_ID" /*optional*/
+#define APPD_SDK_ENV_SERVICE_NAME "APPD_SDK_ENV_SERVICE_NAME"               /*optional*/
+#define APPD_SDK_ENV_SERVICE_INSTANCE_ID "APPD_SDK_ENV_SERVICE_INSTANCE_ID" /*optional*/
 /* }}} */
 
 /* {{{ For API user: environment variables to specify Webserver HostName/IP/Port
  */
-#define APPD_SDK_ENV_MAX_QUEUE_SIZE "APPD_SDK_ENV_MAX_QUEUE_SIZE"   /*required*/
-#define APPD_SDK_ENV_SCHEDULED_DELAY "APPD_SDK_ENV_SCHEDULED_DELAY" /*required*/
-#define APPD_SDK_ENV_EXPORT_BATCH_SIZE                                         \
-  "APPD_SDK_ENV_EXPORT_BATCH_SIZE" /*required*/
+#define APPD_SDK_ENV_MAX_QUEUE_SIZE "APPD_SDK_ENV_MAX_QUEUE_SIZE"       /*required*/
+#define APPD_SDK_ENV_SCHEDULED_DELAY "APPD_SDK_ENV_SCHEDULED_DELAY"     /*required*/
+#define APPD_SDK_ENV_EXPORT_BATCH_SIZE "APPD_SDK_ENV_EXPORT_BATCH_SIZE" /*required*/
 #define APPD_SDK_ENV_EXPORT_TIMEOUT "APPD_SDK_ENV_EXPORT_TIMEOUT"
 /* }}} */
 
@@ -60,10 +55,8 @@
 #define APPD_SDK_ENV_SEGMENT_PARAMETER "APPD_SDK_ENV_SEGMENT_PARAMETER"
 
 /* {{{ For API user: API User logger */
-#define APPD_LOG_API_USER_LOGGER                                               \
-  "api_user" /*logging at the level of sdk function call*/
-#define APPD_LOG_API_LOGGER                                                    \
-  "api" /*logging at the level of sdk core functionality*/
+#define APPD_LOG_API_USER_LOGGER "api_user" /*logging at the level of sdk function call*/
+#define APPD_LOG_API_LOGGER "api"           /*logging at the level of sdk core functionality*/
 /* }}} */
 
 /* {{{ Internal: Status definition */
@@ -78,12 +71,13 @@
 /* }}} */
 
 #if defined(_WIN32)
-#define APPD_SDK_API __declspec(dllexport)
+#  define APPD_SDK_API __declspec(dllexport)
 #else
-#define APPD_SDK_API __attribute__((visibility("default")))
+#  define APPD_SDK_API __attribute__((visibility("default")))
 #endif
 
-typedef enum APPD_SDK_API {
+typedef enum APPD_SDK_API
+{
   APPD_STATUS(success) = 0,
   APPD_STATUS(fail),
   APPD_STATUS(agent_failed_to_start),
@@ -136,7 +130,8 @@ typedef enum APPD_SDK_API {
 /* }}} */
 
 /* {{{ For API user: backend type */
-typedef struct _APPD_SDK_ENV_RECORD {
+typedef struct _APPD_SDK_ENV_RECORD
+{
   const char *name;
   const char *value;
 } APPD_SDK_ENV_RECORD;

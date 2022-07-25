@@ -17,31 +17,34 @@
 #ifndef __ISDKHELPERFACTORY_H
 #define __ISDKHELPERFACTORY_H
 
-#include "opentelemetry/context/propagation/text_map_propagator.h"
-#include "opentelemetry/trace/tracer.h"
 #include <opentelemetry/nostd/shared_ptr.h>
 #include <unordered_map>
 #include <vector>
+#include "opentelemetry/context/propagation/text_map_propagator.h"
+#include "opentelemetry/trace/tracer.h"
 
-namespace appd {
-namespace core {
+namespace appd
+{
+namespace core
+{
 
-using OtelTracer =
-    opentelemetry::nostd::shared_ptr<opentelemetry::trace::Tracer>;
-using OtelPropagators = std::vector<
-    std::unique_ptr<opentelemetry::context::propagation::TextMapPropagator>>;
+using OtelTracer = opentelemetry::nostd::shared_ptr<opentelemetry::trace::Tracer>;
+using OtelPropagators =
+    std::vector<std::unique_ptr<opentelemetry::context::propagation::TextMapPropagator>>;
 
-namespace sdkwrapper {
+namespace sdkwrapper
+{
 
-class ISdkHelperFactory {
+class ISdkHelperFactory
+{
 public:
-  virtual ~ISdkHelperFactory() = default;
-  virtual OtelTracer GetTracer() = 0;
+  virtual ~ISdkHelperFactory()              = default;
+  virtual OtelTracer GetTracer()            = 0;
   virtual OtelPropagators &GetPropagators() = 0;
 };
 
-} // namespace sdkwrapper
-} // namespace core
-} // namespace appd
+}  // namespace sdkwrapper
+}  // namespace core
+}  // namespace appd
 
 #endif

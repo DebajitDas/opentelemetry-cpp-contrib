@@ -16,17 +16,18 @@
 
 #ifndef APPD_APACHECONFIG_H
 #define APPD_APACHECONFIG_H
-#define SIZE                                                                   \
-  5 // Fixed SIZE (intermediate value chosen as 5) for masking private data if
-    // any before logging into Apache logs
+#define SIZE \
+  5  // Fixed SIZE (intermediate value chosen as 5) for masking private data if
+     // any before logging into Apache logs
 
-#include "http_config.h" // cmd_parms
-#include "httpd.h"       // request_rec
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include "http_config.h"  // cmd_parms
+#include "httpd.h"        // request_rec
 
-class appd_cfg {
+class appd_cfg
+{
 public:
   void init();
   bool validate(const request_rec *r);
@@ -38,22 +39,16 @@ public:
   int getOtelExporterTypeInitialized() { return otelExporterType_initialized; }
 
   const char *getOtelExporterEndpoint() { return otelExporterEndpoint; }
-  int getOtelExporterEndpointInitialized() {
-    return otelExporterEndpoint_initialized;
-  }
+  int getOtelExporterEndpointInitialized() { return otelExporterEndpoint_initialized; }
 
   int getOtelSslEnabled() { return otelSslEnabled; }
   int getOtelSslEnabledInitialized() { return otelSslEnabled_initialized; }
 
   const char *getOtelSslCertificatePath() { return otelSslCertificatePath; }
-  int getOtelSslCertificatePathInitialized() {
-    return otelSslCertificatePath_initialized;
-  }
+  int getOtelSslCertificatePathInitialized() { return otelSslCertificatePath_initialized; }
 
   const char *getOtelProcessorType() { return otelProcessorType; }
-  int getOtelProcessorTypeInitialized() {
-    return otelProcessorType_initialized;
-  }
+  int getOtelProcessorTypeInitialized() { return otelProcessorType_initialized; }
 
   const char *getOtelSamplerType() { return otelSamplerType; }
   int getOtelSamplerTypeInitialized() { return otelSamplerType_initialized; }
@@ -65,27 +60,19 @@ public:
   int getServiceNameInitialized() { return serviceName_initialized; }
 
   const char *getServiceInstanceId() { return serviceInstanceId; }
-  int getServiceInstanceIdInitialized() {
-    return serviceInstanceId_initialized;
-  }
+  int getServiceInstanceIdInitialized() { return serviceInstanceId_initialized; }
 
   const char *getOtelMaxQueueSize() { return otelMaxQueueSize; }
   int getOtelMaxQueueSizeInitialized() { return otelMaxQueueSize_initialized; }
 
   const char *getOtelScheduledDelay() { return otelScheduledDelay; }
-  int getOtelScheduledDelayInitialized() {
-    return otelScheduledDelay_initialized;
-  }
+  int getOtelScheduledDelayInitialized() { return otelScheduledDelay_initialized; }
 
   const char *getOtelExportTimeout() { return otelExportTimeout; }
-  int getOtelExportTimeoutInitialized() {
-    return otelExportTimeout_initialized;
-  }
+  int getOtelExportTimeoutInitialized() { return otelExportTimeout_initialized; }
 
   const char *getOtelMaxExportBatchSize() { return otelMaxExportBatchSize; }
-  int getOtelMaxExportBatchSizeInitialized() {
-    return otelMaxExportBatchSize_initialized;
-  }
+  int getOtelMaxExportBatchSizeInitialized() { return otelMaxExportBatchSize_initialized; }
 
   int getResolveBackends() { return resolveBackends; }
   int getResolveBackendsInitialized() { return resolveBackends_initialized; }
@@ -94,7 +81,8 @@ public:
   int getTraceAsErrorInitialized() { return traceAsError_initialized; }
 
   int getReportAllInstrumentedModules() { return reportAllInstrumentedModules; }
-  int getReportAllInstrumentedModulesInitialized() {
+  int getReportAllInstrumentedModulesInitialized()
+  {
     return reportAllInstrumentedModules_initialized;
   }
 
@@ -131,124 +119,120 @@ public:
 
 private:
   // Agent to Controller Connection Configuration
-  int appdEnabled; // OPTIONAL: 0 for false, 1 for true (defaults to true)
+  int appdEnabled;  // OPTIONAL: 0 for false, 1 for true (defaults to true)
   int appdEnabled_initialized;
 
-  const char
-      *otelExporterType; // OPTIONAL: Type of exporter to be configured in
-                         // TracerProvider of OTel SDK embedded into Agent
+  const char *otelExporterType;  // OPTIONAL: Type of exporter to be configured in
+                                 // TracerProvider of OTel SDK embedded into Agent
   int otelExporterType_initialized;
 
-  const char *otelExporterEndpoint; // REQUIRED: AppDynamics endpoint where the
-                                    // OpenTelemetry Exporter inside OTel SDK
-                                    // sends traces
+  const char *otelExporterEndpoint;  // REQUIRED: AppDynamics endpoint where the
+                                     // OpenTelemetry Exporter inside OTel SDK
+                                     // sends traces
   int otelExporterEndpoint_initialized;
 
-  int otelSslEnabled; // OPTIONAL: Decision whether connection to the Exporter
-                      // endpoint is secured
+  int otelSslEnabled;  // OPTIONAL: Decision whether connection to the Exporter
+                       // endpoint is secured
   int otelSslEnabled_initialized;
 
-  const char *otelSslCertificatePath; // OPTIONAL: Certificate path to be
-                                      // mentioned if OtelSslEnabled is set;
+  const char *otelSslCertificatePath;  // OPTIONAL: Certificate path to be
+                                       // mentioned if OtelSslEnabled is set;
   int otelSslCertificatePath_initialized;
 
-  const char *otelProcessorType; // OPTIONAL: Decision on how to pass finished
-                                 // and export-friendly span data representation
-                                 // to configured span exporter
+  const char *otelProcessorType;  // OPTIONAL: Decision on how to pass finished
+                                  // and export-friendly span data representation
+                                  // to configured span exporter
   int otelProcessorType_initialized;
 
-  const char *otelSamplerType; // OPTIONAL: Type of Otel Sampler
+  const char *otelSamplerType;  // OPTIONAL: Type of Otel Sampler
   int otelSamplerType_initialized;
 
-  const char
-      *serviceNamespace; // REQUIRED: A namespace for the AppdServiceName;
-                         // equivalent to your AppDynamics application name
+  const char *serviceNamespace;  // REQUIRED: A namespace for the AppdServiceName;
+                                 // equivalent to your AppDynamics application name
   int serviceNamespace_initialized;
 
-  const char *serviceName; // REQUIRED: Logical name of the service; equivalent
-                           // to your AppDynamics tier name
+  const char *serviceName;  // REQUIRED: Logical name of the service; equivalent
+                            // to your AppDynamics tier name
   int serviceName_initialized;
 
-  const char
-      *serviceInstanceId; // REQUIRED: The string ID of the service instance.
-                          // Distinguish between instances of a service
+  const char *serviceInstanceId;  // REQUIRED: The string ID of the service instance.
+                                  // Distinguish between instances of a service
   int serviceInstanceId_initialized;
 
-  const char *otelMaxQueueSize; // OPTIONAL: The maximum queue size. After the
-                                // size is reached spans are dropped
+  const char *otelMaxQueueSize;  // OPTIONAL: The maximum queue size. After the
+                                 // size is reached spans are dropped
   int otelMaxQueueSize_initialized;
 
-  const char
-      *otelScheduledDelay; // OPTIONAL: The delay interval in milliseconds
-                           // between two consecutive exports
+  const char *otelScheduledDelay;  // OPTIONAL: The delay interval in milliseconds
+                                   // between two consecutive exports
   int otelScheduledDelay_initialized;
 
-  const char *otelExportTimeout; // OPTIONAL: How long the export can run in
-                                 // milliseconds before it is cancelled
+  const char *otelExportTimeout;  // OPTIONAL: How long the export can run in
+                                  // milliseconds before it is cancelled
   int otelExportTimeout_initialized;
 
-  const char *otelMaxExportBatchSize; // OPTIONAL: The maximum batch size of
-                                      // every export. It must be smaller or
-                                      // equal to maxQueueSize
+  const char *otelMaxExportBatchSize;  // OPTIONAL: The maximum batch size of
+                                       // every export. It must be smaller or
+                                       // equal to maxQueueSize
   int otelMaxExportBatchSize_initialized;
 
-  int resolveBackends; // OPTIONAL: Resolve backends as a tier
+  int resolveBackends;  // OPTIONAL: Resolve backends as a tier
   int resolveBackends_initialized;
 
-  int traceAsError; // OPTIONAL: Determine whether we put all diagnostic output
-                    // to error_log
+  int traceAsError;  // OPTIONAL: Determine whether we put all diagnostic output
+                     // to error_log
   int traceAsError_initialized;
 
-  int reportAllInstrumentedModules; // OPTIONAL: Report ALL modules as backends
-                                    // instead of only HANDLER modules
+  int reportAllInstrumentedModules;  // OPTIONAL: Report ALL modules as backends
+                                     // instead of only HANDLER modules
   int reportAllInstrumentedModules_initialized;
 
   // variables for tracing calls
-  char *loc; // Location to which this record applies.
+  char *loc;  // Location to which this record applies.
 
   // GDPR: cookie masking
-  int maskCookie; // OPTIONAL: Mask Coookies
+  int maskCookie;  // OPTIONAL: Mask Coookies
   int maskCookie_initialized;
 
-  const char *cookiePattern; // OPTIONAL: Required only if there is a need to
-                             // mask part of cookie, otherwise it will mask
-                             // whole cookie if maskCookie is enabled
+  const char *cookiePattern;  // OPTIONAL: Required only if there is a need to
+                              // mask part of cookie, otherwise it will mask
+                              // whole cookie if maskCookie is enabled
   int cookiePattern_initialized;
 
-  int maskSmUser; // OPTIONAL: Mask SM_USER
+  int maskSmUser;  // OPTIONAL: Mask SM_USER
   int maskSmUser_initialized;
 
   // URL redaction
-  const char *delimiter; // OPTIONAL: Required only if there is a need to redact
-                         // certain URL segments
+  const char *delimiter;  // OPTIONAL: Required only if there is a need to redact
+                          // certain URL segments
   int delimiter_initialized;
 
-  const char *segment; // OPTIONAL: Required only if there is a need to redact
-                       // certain URL segments
+  const char *segment;  // OPTIONAL: Required only if there is a need to redact
+                        // certain URL segments
   int segment_initialized;
 
-  const char *matchFilter; // OPTIONAL: Required only if there is a need to
-                           // redact certain URL segments
+  const char *matchFilter;  // OPTIONAL: Required only if there is a need to
+                            // redact certain URL segments
   int matchFilter_initialized;
 
-  const char *matchPattern; // OPTIONAL: Required only if there is a need to
-                            // redact certain URL segments
+  const char *matchPattern;  // OPTIONAL: Required only if there is a need to
+                             // redact certain URL segments
   int matchPattern_initialized;
 
   // Rules on how the span/BT name would be created.
-  const char
-      *segmentType; // OPTIONAL: Possible Values are FIRST, LAST, CUSTOM..
+  const char *segmentType;  // OPTIONAL: Possible Values are FIRST, LAST, CUSTOM..
   int segmentType_initialized;
 
-  const char *segmentParameter; // OPTIONAL: Should be specified if segmentType
-                                // is provided.
-  int segmentParameter_initialized; // if FIRST/LAST is choosen above, segment
-                                    // count should be provided. if CUSTOM is
-                                    // choosen, segment numbers should be
-                                    // provided such as 2,3
+  const char *segmentParameter;      // OPTIONAL: Should be specified if segmentType
+                                     // is provided.
+  int segmentParameter_initialized;  // if FIRST/LAST is choosen above, segment
+                                     // count should be provided. if CUSTOM is
+                                     // choosen, segment numbers should be
+                                     // provided such as 2,3
 };
 
-class WebserverContext {
+class WebserverContext
+{
 public:
   std::string m_serviceNamespace;
   std::string m_serviceName;
@@ -256,81 +240,58 @@ public:
   // TODO: in future we may need to put in controller host/port, account name,
   // access key, etc
 
-  WebserverContext(const char *serviceNamespace, const char *serviceName,
+  WebserverContext(const char *serviceNamespace,
+                   const char *serviceName,
                    const char *serviceInstanceId)
-      : m_serviceNamespace(serviceNamespace), m_serviceName(serviceName),
+      : m_serviceNamespace(serviceNamespace),
+        m_serviceName(serviceName),
         m_serviceInstanceId(serviceInstanceId){};
 
 private:
   WebserverContext(){};
 };
 
-class ApacheConfigHandlers {
+class ApacheConfigHandlers
+{
 public:
-  static std::unordered_map<std::string, std::shared_ptr<WebserverContext>>
-      m_webServerContexts;
+  static std::unordered_map<std::string, std::shared_ptr<WebserverContext>> m_webServerContexts;
 
-  static const char *appd_set_enabled(cmd_parms *cmd, void *conf,
-                                      const char *arg);
-  static const char *appd_set_otelExporterType(cmd_parms *cmd, void *conf,
-                                               const char *arg);
-  static const char *appd_set_otelExporterEndpoint(cmd_parms *cmd, void *conf,
-                                                   const char *arg);
-  static const char *appd_set_otelSslEnabled(cmd_parms *cmd, void *conf,
-                                             const char *arg);
-  static const char *appd_set_otelSslCertificatePath(cmd_parms *cmd, void *conf,
-                                                     const char *arg);
-  static const char *appd_set_otelProcessorType(cmd_parms *cmd, void *conf,
-                                                const char *arg);
-  static const char *appd_set_otelSamplerType(cmd_parms *cmd, void *conf,
-                                              const char *arg);
-  static const char *appd_set_serviceNamespace(cmd_parms *cmd, void *conf,
-                                               const char *arg);
-  static const char *appd_set_serviceName(cmd_parms *cmd, void *conf,
-                                          const char *arg);
-  static const char *appd_set_serviceInstanceId(cmd_parms *cmd, void *conf,
-                                                const char *arg);
-  static const char *appd_set_otelMaxQueueSize(cmd_parms *cmd, void *conf,
-                                               const char *arg);
-  static const char *appd_set_otelScheduledDelay(cmd_parms *cmd, void *conf,
-                                                 const char *arg);
-  static const char *appd_set_otelExportTimeout(cmd_parms *cmd, void *conf,
-                                                const char *arg);
-  static const char *appd_set_otelMaxExportBatchSize(cmd_parms *cmd, void *conf,
-                                                     const char *arg);
-  static const char *appd_set_resolveBackends(cmd_parms *cmd, void *conf,
-                                              const char *arg);
-  static const char *appd_set_traceAsError(cmd_parms *cmd, void *conf,
-                                           const char *arg);
+  static const char *appd_set_enabled(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelExporterType(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelExporterEndpoint(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelSslEnabled(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelSslCertificatePath(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelProcessorType(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelSamplerType(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_serviceNamespace(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_serviceName(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_serviceInstanceId(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelMaxQueueSize(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelScheduledDelay(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelExportTimeout(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_otelMaxExportBatchSize(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_resolveBackends(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_traceAsError(cmd_parms *cmd, void *conf, const char *arg);
   static const char *appd_set_reportAllInstrumentedModules(cmd_parms *cmd,
                                                            void *conf,
                                                            const char *arg);
-  static const char *appd_set_maskCookie(cmd_parms *cmd, void *conf,
-                                         const char *arg);
-  static const char *appd_set_cookiePattern(cmd_parms *cmd, void *conf,
-                                            const char *arg);
-  static const char *appd_set_maskSmUser(cmd_parms *cmd, void *conf,
-                                         const char *arg);
-  static const char *appd_set_delimiter(cmd_parms *cmd, void *conf,
-                                        const char *arg);
-  static const char *appd_set_segment(cmd_parms *cmd, void *conf,
-                                      const char *arg);
-  static const char *appd_set_matchFilter(cmd_parms *cmd, void *conf,
-                                          const char *arg);
-  static const char *appd_set_matchPattern(cmd_parms *cmd, void *conf,
-                                           const char *arg);
-  static const char *appd_set_segmentType(cmd_parms *cmd, void *conf,
-                                          const char *arg);
-  static const char *appd_set_segmentParameter(cmd_parms *cmd, void *conf,
-                                               const char *arg);
-  static const char *appd_add_webserver_context(cmd_parms *cmd, void *conf,
+  static const char *appd_set_maskCookie(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_cookiePattern(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_maskSmUser(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_delimiter(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_segment(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_matchFilter(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_matchPattern(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_segmentType(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_set_segmentParameter(cmd_parms *cmd, void *conf, const char *arg);
+  static const char *appd_add_webserver_context(cmd_parms *cmd,
+                                                void *conf,
                                                 const char *serviceNamespace,
                                                 const char *serviceName,
                                                 const char *serviceInstanceId);
 
   static void *appd_create_dir_config(apr_pool_t *p, char *dirspec);
-  static void *appd_merge_dir_config(apr_pool_t *p, void *parent_conf,
-                                     void *newloc_conf);
+  static void *appd_merge_dir_config(apr_pool_t *p, void *parent_conf, void *newloc_conf);
 
   static appd_cfg *getConfig(const request_rec *r);
   static appd_cfg *getProcessConfig(const request_rec *r);
@@ -344,11 +305,18 @@ public:
 private:
   static appd_cfg *our_dconfig(const request_rec *r);
 
-  static const char *helperChar(cmd_parms *cmd, appd_cfg *cfg, const char *arg,
-                                const char *&var, int &inherit,
+  static const char *helperChar(cmd_parms *cmd,
+                                appd_cfg *cfg,
+                                const char *arg,
+                                const char *&var,
+                                int &inherit,
                                 const char *varName);
-  static const char *helperInt(cmd_parms *cmd, appd_cfg *cfg, const char *arg,
-                               int &var, int &inherit, const char *varName);
+  static const char *helperInt(cmd_parms *cmd,
+                               appd_cfg *cfg,
+                               const char *arg,
+                               int &var,
+                               int &inherit,
+                               const char *varName);
   static void insertWebserverContext(cmd_parms *cmd, const appd_cfg *cfg);
 };
 
