@@ -512,6 +512,11 @@ task runApacheServer(type: Exec) {
     commandLine './ApacheTesting.sh', "${target_system}"
 }
 
+task runClangFormat(type: Exec) {
+    commandLine 'bash', '-c',
+    'clang-format -i -style=file $(find . -name *.cpp -print -o -name *.h -print)'
+}
+
 // Code Coverage
 
 task lcovCapture(type: Exec) {

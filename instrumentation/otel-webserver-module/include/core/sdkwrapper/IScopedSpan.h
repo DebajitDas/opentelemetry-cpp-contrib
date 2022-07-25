@@ -1,27 +1,26 @@
 /*
-* Copyright 2021 AppDynamics LLC. 
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2021 AppDynamics LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef __ISCOPEDSPAN_H
 #define __ISCOPEDSPAN_H
 
 #include "sdkwrapper/SdkEnums.h"
+#include <chrono>
 #include <opentelemetry/common/attribute_value.h>
 #include <unordered_map>
-#include <chrono>
-
 
 namespace appd {
 namespace core {
@@ -33,25 +32,25 @@ using namespace opentelemetry;
 
 class IScopedSpan {
 public:
-	virtual ~IScopedSpan() = default;
+  virtual ~IScopedSpan() = default;
 
-	virtual void End() = 0;
+  virtual void End() = 0;
 
-	virtual void AddEvent(const std::string& name,
-    	const std::chrono::system_clock::time_point &timePoint,
-        const OtelKeyValueMap& attributes) = 0;
+  virtual void AddEvent(const std::string &name,
+                        const std::chrono::system_clock::time_point &timePoint,
+                        const OtelKeyValueMap &attributes) = 0;
 
-	virtual void AddAttribute(const std::string& key,
-	const SpanAttributeValue& value) = 0;
+  virtual void AddAttribute(const std::string &key,
+                            const SpanAttributeValue &value) = 0;
 
-        virtual void SetStatus(const StatusCode status, const std::string& desc = "") = 0;
+  virtual void SetStatus(const StatusCode status,
+                         const std::string &desc = "") = 0;
 
-        virtual SpanKind GetSpanKind() = 0;
+  virtual SpanKind GetSpanKind() = 0;
 };
 
-} //sdkwrapper
-} //core
-} //appd
-
+} // namespace sdkwrapper
+} // namespace core
+} // namespace appd
 
 #endif
