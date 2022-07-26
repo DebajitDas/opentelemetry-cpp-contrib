@@ -193,9 +193,9 @@ jobs:
     strategy:
       matrix:
         path:
-          - 'src'
-          - 'include'
-          - 'test'
+          - 'instrumentation/otel-webserver-module/src'
+          - 'instrumentation/otel-webserver-module/include'
+          - 'instrumentation/otel-webserver-module/test'
     steps:
     - name: checkout otel webserver
       uses: actions/checkout@v3
