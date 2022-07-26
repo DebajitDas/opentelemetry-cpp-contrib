@@ -514,7 +514,7 @@ task runApacheServer(type: Exec) {
 
 task runClangFormat(type: Exec) {
     commandLine 'bash', '-c',
-    'clang-format -i -style=file $(find . -name *.cpp -print -o -name *.h -print)'
+    'clang-format -i -style=file $(find . -name *.cpp -print -o -name *.h -print -o -name *.c -print)'
 }
 
 // Code Coverage
