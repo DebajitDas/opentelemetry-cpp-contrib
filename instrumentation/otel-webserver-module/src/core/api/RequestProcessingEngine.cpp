@@ -51,6 +51,7 @@ APPD_SDK_STATUS_CODE RequestProcessingEngine::startRequest(
     const std::string& wscontext,
     RequestPayload* payload,
     APPD_SDK_HANDLE_REQ* reqHandle) {
+  
     if (!reqHandle) {
         LOG4CXX_ERROR(mLogger, __FUNCTION__ << " " << APPD_STATUS(handle_pointer_is_null));
         return APPD_STATUS(handle_pointer_is_null);

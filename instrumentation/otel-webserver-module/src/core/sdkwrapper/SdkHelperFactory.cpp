@@ -27,6 +27,16 @@
 #include "opentelemetry/sdk/resource/resource.h"
 #include "opentelemetry/exporters/otlp/otlp_grpc_exporter.h"
 #include "opentelemetry/baggage/propagation/baggage_propagator.h"
+
+#include "opentelemetry/exporters/otlp/otlp_grpc_metric_exporter.h"
+#include "opentelemetry/exporters/ostream/metric_exporter.h"
+#  include "opentelemetry/metrics/provider.h"
+#  include "opentelemetry/sdk/metrics/aggregation/default_aggregation.h"
+#  include "opentelemetry/sdk/metrics/aggregation/histogram_aggregation.h"
+#  include "opentelemetry/sdk/metrics/export/periodic_exporting_metric_reader.h"
+#  include "opentelemetry/sdk/metrics/meter.h"
+#  include "opentelemetry/sdk/metrics/meter_provider.h"
+
 #include <module_version.h>
 #include <fstream>
 #include <iostream>
@@ -47,6 +57,16 @@ namespace {
   constexpr const char* PARENT_BASED_SAMPLER = "parent";
   constexpr const char* TRACE_ID_RATIO_BASED_SAMPLER = "trace_id_ratio";
 }
+
+class MeasurementFetcher
+{
+public:
+  static void Fetcher(opentelemetry::metrics::ObserverResult<long> &observer_result, void *state)
+  {
+    long val = (rand() % 700) + 1;
+    observer_result.Observe(val /*, labelkv*/);
+  }
+};
 
 SdkHelperFactory::SdkHelperFactory(
     std::shared_ptr<TenantConfig> config,
@@ -98,6 +118,44 @@ SdkHelperFactory::SdkHelperFactory(
     using BaggagePropagator = opentelemetry::baggage::propagation::BaggagePropagator;
     mPropagators.push_back(
         std::unique_ptr<BaggagePropagator>(new BaggagePropagator()));
+
+    namespace metrics_sdk      = opentelemetry::sdk::metrics;
+    namespace metrics_api      = opentelemetry::metrics;
+
+    opentelemetry::exporter::otlp::OtlpGrpcMetricExporterOptions opts;
+    opts.endpoint = "docker.for.mac.localhost:4317";
+    std::unique_ptr<opentelemetry::exporter::otlp::OtlpGrpcMetricExporter> mexporter{
+      new opentelemetry::exporter::otlp::OtlpGrpcMetricExporter()};
+
+    std::string version{"1.2.0"};
+    std::string schema{"https://opentelemetry.io/schemas/1.2.0"};
+
+    // Initialize and set the global MeterProvider
+    metrics_sdk::PeriodicExportingMetricReaderOptions options;
+    options.export_interval_millis = std::chrono::milliseconds(10000);
+    options.export_timeout_millis  = std::chrono::milliseconds(500);
+    std::unique_ptr<metrics_sdk::MetricReader> reader{
+        new metrics_sdk::PeriodicExportingMetricReader(std::move(mexporter), options)};
+    auto provider = std::shared_ptr<metrics_api::MeterProvider>(new metrics_sdk::MeterProvider());
+    auto p        = std::static_pointer_cast<metrics_sdk::MeterProvider>(provider);
+    p->AddMetricReader(std::move(reader));
+
+    // counter view
+    std::string name {"TotalRequests"};
+    std::string counter_name = name + "_counter";
+    std::unique_ptr<metrics_sdk::InstrumentSelector> instrument_selector{
+        new metrics_sdk::InstrumentSelector(metrics_sdk::InstrumentType::kCounter, counter_name)};
+    std::unique_ptr<metrics_sdk::MeterSelector> meter_selector{
+        new metrics_sdk::MeterSelector(name, version, schema)};
+    std::unique_ptr<metrics_sdk::View> sum_view{
+        new metrics_sdk::View{name, "description", metrics_sdk::AggregationType::kSum}};
+    p->AddView(std::move(instrument_selector), std::move(meter_selector), std::move(sum_view));
+
+    metrics_api::Provider::SetMeterProvider(provider);
+
+    auto nprovider                               = metrics_api::Provider::GetMeterProvider();
+    nostd::shared_ptr<metrics_api::Meter> meter = nprovider->GetMeter(name, "1.2.0");
+    meter->CreateLongObservableCounter(counter_name, appd::core::sdkwrapper::MeasurementFetcher::Fetcher);
 }
 
 OtelTracer SdkHelperFactory::GetTracer()
