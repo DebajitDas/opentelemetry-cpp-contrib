@@ -56,7 +56,7 @@
           '$(ANSDK_DIR)/opentelemetry/$(OPENTELEMETRY_VERSION)/lib/libopentelemetry_exporter_otlp_grpc.so',
           '$(ANSDK_DIR)/opentelemetry/$(OPENTELEMETRY_VERSION)/lib/libopentelemetry_exporter_ostream_metrics.so',
           '$(ANSDK_DIR)/opentelemetry/$(OPENTELEMETRY_VERSION)/lib/libopentelemetry_metrics.so',
-          '$(ANSDK_DIR)/opentelemetry/$(OPENTELEMETRY_VERSION)/lib/libopentelemetry_exporter_otlp_grpc_metrics.so',
+          #'$(ANSDK_DIR)/opentelemetry/$(OPENTELEMETRY_VERSION)/lib/libopentelemetry_exporter_otlp_grpc_metrics.so',
           '$(BOOST_LIB)',
           '$(LINKER_FLAGS)',
           '$(LIBRARY_FLAGS)',

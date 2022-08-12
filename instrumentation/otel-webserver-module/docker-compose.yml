@@ -22,7 +22,7 @@ services:
         image: apache_centos7
         hostname: webserver
         container_name: webserver_centos7
-        command: bash -c " httpd -k start && tail -f /dev/null "
+        command: bash -c " tail -f /dev/null "
         profiles:
             - centos7
         ports:

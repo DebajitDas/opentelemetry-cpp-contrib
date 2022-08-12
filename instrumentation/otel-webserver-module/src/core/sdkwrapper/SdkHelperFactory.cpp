@@ -124,8 +124,10 @@ SdkHelperFactory::SdkHelperFactory(
 
     opentelemetry::exporter::otlp::OtlpGrpcMetricExporterOptions opts;
     opts.endpoint = "docker.for.mac.localhost:4317";
-    std::unique_ptr<opentelemetry::exporter::otlp::OtlpGrpcMetricExporter> mexporter{
-      new opentelemetry::exporter::otlp::OtlpGrpcMetricExporter()};
+    //auto mexporter = std::unique_ptr<opentelemetry::exporter::otlp::OtlpGrpcMetricExporter>(
+    //        new opentelemetry::exporter::otlp::OtlpGrpcMetricExporter());
+    auto mexporter = std::unique_ptr<opentelemetry::exporter::metrics::OStreamMetricExporter>(
+            new opentelemetry::exporter::metrics::OStreamMetricExporter());
 
     std::string version{"1.2.0"};
     std::string schema{"https://opentelemetry.io/schemas/1.2.0"};
