@@ -32,6 +32,7 @@
 #include "opentelemetry/trace/tracer_provider.h"
 #include "sdkwrapper/ISdkWrapper.h"
 #include "AgentLogger.h"
+#  include "opentelemetry/sdk/metrics/meter.h"
 
 namespace appd {
 namespace core {
@@ -67,6 +68,7 @@ private:
 	OtelTracer mTracer;
 	OtelPropagators mPropagators;
 	const AgentLogger& mLogger;
+	//nostd::shared_ptr<opentelemetry::metrics::ObservableInstrument> counter;
 };
 
 } //sdkwrapper

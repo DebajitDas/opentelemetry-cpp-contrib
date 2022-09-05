@@ -49,14 +49,14 @@ std::shared_ptr<IScopedSpan> SdkWrapper::CreateSpan(
 	const OtelKeyValueMap& attributes,
 	const std::unordered_map<std::string, std::string>& carrier)
 {
-	namespace metrics_api = opentelemetry::v1::metrics;
+	/*namespace metrics_api = opentelemetry::v1::metrics;
 	std::string Mname {"TotalRequests"};
     std::string counter_name                    = Mname + "_counter";
     auto provider                               = metrics_api::Provider::GetMeterProvider();
     nostd::shared_ptr<metrics_api::Meter> meter = provider->GetMeter(Mname, "1.2.0");
     auto long_counter                           = meter->CreateLongCounter(counter_name);
     long val = (rand() % 700) + 1;
-    long_counter->Add(val);
+    long_counter->Add(val);*/
 
 	LOG4CXX_DEBUG(mLogger, "Creating Span of kind: "
 		<< static_cast<int>(kind));

@@ -47,7 +47,7 @@ project.ext {
     apache22Version = "2.2.31"
     apache24Version = "2.4.23"
     nginxVersion = '1.18.0'
-    opentelemetryVersion = '1.5.0'
+    opentelemetryVersion = '1.6.0'
 
     libraryStageDir = "${platBuildDir}/opentelemetry-webserver-sdk"
     apacheStageDir = "${libraryStageDir}/WebServerModule/Apache"

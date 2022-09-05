@@ -61,10 +61,12 @@ namespace {
 class MeasurementFetcher
 {
 public:
-  static void Fetcher(opentelemetry::metrics::ObserverResult<long> &observer_result, void *state)
+  static void Fetcher(opentelemetry::metrics::ObserverResult observer_result, void *state)
   {
     long val = (rand() % 700) + 1;
-    observer_result.Observe(val /*, labelkv*/);
+    //nostd::get<nostd::shared_ptr<opentelemetry::metrics::ObserverResultT<long>>>(
+    //      observer_result)
+    //      ->Observe(val /*, labelkv */);
   }
 };
 
@@ -124,10 +126,10 @@ SdkHelperFactory::SdkHelperFactory(
 
     opentelemetry::exporter::otlp::OtlpGrpcMetricExporterOptions opts;
     opts.endpoint = "docker.for.mac.localhost:4317";
-    //auto mexporter = std::unique_ptr<opentelemetry::exporter::otlp::OtlpGrpcMetricExporter>(
-    //        new opentelemetry::exporter::otlp::OtlpGrpcMetricExporter());
-    auto mexporter = std::unique_ptr<opentelemetry::exporter::metrics::OStreamMetricExporter>(
-            new opentelemetry::exporter::metrics::OStreamMetricExporter());
+    auto mexporter = std::unique_ptr<opentelemetry::exporter::otlp::OtlpGrpcMetricExporter>(
+            new opentelemetry::exporter::otlp::OtlpGrpcMetricExporter());
+    //auto mexporter = std::unique_ptr<opentelemetry::exporter::metrics::OStreamMetricExporter>(
+            //new opentelemetry::exporter::metrics::OStreamMetricExporter());
 
     std::string version{"1.2.0"};
     std::string schema{"https://opentelemetry.io/schemas/1.2.0"};
@@ -135,7 +137,7 @@ SdkHelperFactory::SdkHelperFactory(
     // Initialize and set the global MeterProvider
     metrics_sdk::PeriodicExportingMetricReaderOptions options;
     options.export_interval_millis = std::chrono::milliseconds(10000);
-    options.export_timeout_millis  = std::chrono::milliseconds(500);
+    options.export_timeout_millis  = std::chrono::milliseconds(5000);
     std::unique_ptr<metrics_sdk::MetricReader> reader{
         new metrics_sdk::PeriodicExportingMetricReader(std::move(mexporter), options)};
     auto provider = std::shared_ptr<metrics_api::MeterProvider>(new metrics_sdk::MeterProvider());
@@ -155,9 +157,11 @@ SdkHelperFactory::SdkHelperFactory(
 
     metrics_api::Provider::SetMeterProvider(provider);
 
-    auto nprovider                               = metrics_api::Provider::GetMeterProvider();
-    nostd::shared_ptr<metrics_api::Meter> meter = nprovider->GetMeter(name, "1.2.0");
-    meter->CreateLongObservableCounter(counter_name, appd::core::sdkwrapper::MeasurementFetcher::Fetcher);
+    //auto nprovider                               = metrics_api::Provider::GetMeterProvider();
+    //nostd::shared_ptr<metrics_api::Meter> meter = nprovider->GetMeter(name, "1.2.0");
+    //counter = meter->CreateLongObservableCounter(counter_name);
+    //counter->AddCallback(appd::core::sdkwrapper::MeasurementFetcher::Fetcher, nullptr);
+
 }
 
 OtelTracer SdkHelperFactory::GetTracer()
