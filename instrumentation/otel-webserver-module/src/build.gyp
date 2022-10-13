@@ -54,6 +54,7 @@
           '$(ANSDK_DIR)/opentelemetry/1.2.0/lib/libopentelemetry_otlp_recordable.so',
           '$(ANSDK_DIR)/opentelemetry/1.2.0/lib/libopentelemetry_exporter_ostream_span.so',
           '$(ANSDK_DIR)/opentelemetry/1.2.0/lib/libopentelemetry_exporter_otlp_grpc.so',
+	  '/temp_client/temp_client/client.so',
           '$(BOOST_LIB)',
           '$(LINKER_FLAGS)',
           '$(LIBRARY_FLAGS)',
@@ -65,7 +66,8 @@
           '../include/util',
           '../include/core',
           '$(ANSDK_DIR)/opentelemetry/1.2.0/include/',
-          '$(BOOST_INCLUDE)'
+          '$(BOOST_INCLUDE)',
+	  '/temp_client/temp_client/',
         ],
 
         'ldflags': [

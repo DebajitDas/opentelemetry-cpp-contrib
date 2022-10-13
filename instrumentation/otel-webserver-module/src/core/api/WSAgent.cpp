@@ -76,7 +76,7 @@ WSAgent::init(APPD_SDK_ENV_RECORD* env, unsigned numberOfRecords)
         apiFuncTraceError(BOOST_CURRENT_FUNCTION, APPD_STATUS(agent_failed_to_start));
         return(APPD_STATUS(agent_failed_to_start));
     }
-
+	
     initialisePid();
 
     return APPD_SUCCESS;

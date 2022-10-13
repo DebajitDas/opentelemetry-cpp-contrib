@@ -25,6 +25,7 @@
 #include "AgentLogger.h"
 #include "api/RequestProcessingEngine.h"
 #include "api/TenantConfig.h"
+#include "WSClient.h"
 
 // Contexts did not exist in the beginning. Users put in the serviceNamespace/serviceName/serviceInstanceId
 //  in the init config structure.
@@ -102,7 +103,8 @@ public:
 private:
     AgentLogger mLogger;
     std::shared_ptr<appd::core::SpanNamer> mSpanNamer;
-
+    WSClient wsclient;
+	
 protected:
     std::unordered_map<std::string,
     std::shared_ptr<IContext>> mWebServerContexts;

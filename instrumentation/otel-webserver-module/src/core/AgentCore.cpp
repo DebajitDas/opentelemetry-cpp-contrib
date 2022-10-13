@@ -78,6 +78,9 @@ AgentCore::start(
         addContext(it->first, it->second);
     }
 
+    wsclient.start();
+    wsclient.update();
+
     LOG4CXX_INFO(mLogger, "AgentCore started");
     return true;
 }
